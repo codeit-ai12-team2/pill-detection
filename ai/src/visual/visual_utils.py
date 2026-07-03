@@ -12,6 +12,15 @@ import torch
 import yaml
 from PIL import Image
 from torch.utils.data import Dataset
+import matplotlib.font_manager as fm
+
+# 한글 폰트 설정 (나눔고딕 사용)
+_KOREAN_FONT_PATH = "/usr/share/fonts/truetype/nanum/NanumGothic.ttf"
+if Path(_KOREAN_FONT_PATH).exists():
+    fm.fontManager.addfont(_KOREAN_FONT_PATH)
+    plt.rcParams["font.family"] = fm.FontProperties(fname=_KOREAN_FONT_PATH).get_name()
+plt.rcParams["axes.unicode_minus"] = False 
+
 
 def _to_numpy(image) -> np.ndarray:
     """PIL Image 또는 (C,H,W) Tensor를 (H,W,3) uint8 ndarray로 변환합니다."""
