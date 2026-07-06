@@ -1,0 +1,11 @@
+data: ../../data/processed/yolo/dataset.yaml
+
+epochs: 60
+batch: 16
+imgsz: 640
+
+optimizer: auto
+
+mosaic: 0.5
+
+seed: 42
