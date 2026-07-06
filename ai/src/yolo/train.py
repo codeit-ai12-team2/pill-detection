@@ -44,7 +44,7 @@ def main(model_name: str = "yolo11s"):
     model = YOLO(model_pt)
     model.train(
         **config,
-        augmentations=custom_transforms,  
+        augmentations=custom_transforms,
         device=device,
         project=str(YOLO_DIR / "runs/detect"),
     )
