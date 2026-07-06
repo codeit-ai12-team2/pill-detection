@@ -13,3 +13,4 @@ matplotlib
 tqdm
 ultralytics
 pandas
+albumentations

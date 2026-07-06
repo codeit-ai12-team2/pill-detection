@@ -1,0 +1,2 @@
+model: yolo11m.pt
+name: yolo11m

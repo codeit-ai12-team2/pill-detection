@@ -45,12 +45,27 @@ def main():
         print(f"       {YOLO_DIR} 에 {{name, model}} 키를 가진 yaml 파일을 추가하세요.")
         sys.exit(1)
 
-    model_idx = choose([cfg["name"] for cfg in model_configs], "모델 선택")
-    selected = model_configs[model_idx]
-
-    action_idx = choose(["학습 (train)", "예측 (predict)"], "동작 선택")
+    action_idx = choose(["학습 (train)", "예측 (predict)", "성능 확인 (result)"], "동작 선택")
 
     print()
+
+    if action_idx == 2:
+        # 성능 확인은 전체 모델을 한 번에 비교할지, 특정 모델만 볼지 선택
+        scope_idx = choose(["전체 모델 비교", "특정 모델만 확인"], "확인 범위 선택")
+        from result import main as result_main
+
+        if scope_idx == 0:
+            print("[전체 모델 성능 비교]")
+            result_main(model_name=None)
+        else:
+            model_idx = choose([cfg["name"] for cfg in model_configs], "모델 선택")
+            selected = model_configs[model_idx]
+            print(f"[{selected['name']} 성능 확인]")
+            result_main(model_name=selected["stem"])
+        return
+
+    model_idx = choose([cfg["name"] for cfg in model_configs], "모델 선택")
+    selected = model_configs[model_idx]
 
     if action_idx == 0:
         from train import main as train_main

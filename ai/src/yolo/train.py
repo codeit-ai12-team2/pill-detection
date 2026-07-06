@@ -1,8 +1,10 @@
 from pathlib import Path
 
+import cv2
 import torch
 import yaml
 from ultralytics import YOLO
+import albumentations as A
 
 YOLO_DIR = Path(__file__).parent
 
@@ -30,13 +32,19 @@ def main(model_name: str = "yolo11s"):
     model_config = load_config(YOLO_DIR / f"{model_name}.yaml")
 
     config = {**train_config, **model_config}
+    config.pop("augmentations", None) 
 
     model_pt = YOLO_DIR / config.pop("model")
     config["data"] = str((YOLO_DIR / config["data"]).resolve())
 
+    custom_transforms = [
+       # A.Rotate(limit=180, border_mode=cv2.BORDER_CONSTANT, crop_border=False, p=0.8),
+    ]
+
     model = YOLO(model_pt)
     model.train(
         **config,
+        augmentations=custom_transforms,
         device=device,
         project=str(YOLO_DIR / "runs/detect"),
     )

@@ -1,6 +1,7 @@
 import json
 import random
 import shutil
+from collections import Counter
 from pathlib import Path
 from tqdm import tqdm
 
@@ -80,18 +81,108 @@ for jf in tqdm(json_files, desc="Parsing annotations\t"):
 
 print(f"Total unique images: {len(image_meta)}")
 
-# train / val split을 이미지 단위로 수행 (Fix 2)
-all_images = list(image_meta.keys())
-random.shuffle(all_images)
+def stratified_split(
+    image_meta: dict[str, dict],
+    class_map: dict[int, int],
+    train_ratio: float,
+    seed: int,
+) -> tuple[list[str], list[str]]:
+    """
+    클래스별 인스턴스 수가 train/val에 train_ratio 비율대로 고르게 배분되도록 층화 분할합니다.
 
-split = int(len(all_images) * TRAIN_RATIO)
+    Args:
+        image_meta: 이미지 파일명 → {width, height, anns} 메타 정보
+        class_map: 원본 category_id → YOLO 클래스 인덱스 매핑
+        train_ratio: train에 배정할 비율 (0~1)
+        seed: 랜덤 seed
 
-train_images = all_images[:split]
-val_images = all_images[split:]
+    Returns:
+        (train_images, val_images) 이미지 파일명 리스트 튜플
+    """
+    rng = random.Random(seed)
+
+    image_class_counts: dict[str, Counter] = {}
+    class_total: Counter = Counter()
+
+    for image_name, meta in image_meta.items():
+        counts = Counter(class_map[ann["category_id"]] for ann in meta["anns"])
+        image_class_counts[image_name] = counts
+        class_total.update(counts)
+
+    ratios = {"train": train_ratio, "val": 1 - train_ratio}
+    desired = {
+        subset: {cid: cnt * r for cid, cnt in class_total.items()}
+        for subset, r in ratios.items()
+    }
+
+    remaining = {
+        name: counts for name, counts in image_class_counts.items() if counts
+    }
+    unlabeled_images = [
+        name for name, counts in image_class_counts.items() if not counts
+    ]
+    assigned: dict[str, list[str]] = {"train": [], "val": []}
+
+    while remaining:
+        # 아직 미배정 이미지가 남아 있는 클래스 중 가장 희귀한 클래스 선택
+        class_remaining_images: Counter = Counter()
+        for counts in remaining.values():
+            class_remaining_images.update(counts.keys())
+
+        rarest_cid = min(
+            class_remaining_images,
+            key=lambda cid: (class_remaining_images[cid], cid),
+        )
+
+        candidates = [name for name, counts in remaining.items() if rarest_cid in counts]
+        rng.shuffle(candidates)
+
+        for name in candidates:
+            counts = remaining.pop(name)
+
+            # 해당 클래스가 더 부족한(desired가 큰) subset에 배정,
+            # 동률이면 전체 desired 합이 더 큰 subset, 그래도 동률이면 랜덤
+            def subset_key(subset: str) -> tuple[float, float, float]:
+                return (
+                    desired[subset].get(rarest_cid, 0.0),
+                    sum(desired[subset].values()),
+                    rng.random(),
+                )
+
+            subset = max(("train", "val"), key=subset_key)
+
+            assigned[subset].append(name)
+            for cid, cnt in counts.items():
+                desired[subset][cid] = desired[subset].get(cid, 0.0) - cnt
+
+    # 라벨이 없는 이미지는 비율대로 랜덤 배정
+    rng.shuffle(unlabeled_images)
+    cut = round(len(unlabeled_images) * train_ratio)
+    assigned["train"].extend(unlabeled_images[:cut])
+    assigned["val"].extend(unlabeled_images[cut:])
+
+    rng.shuffle(assigned["train"])
+    rng.shuffle(assigned["val"])
+
+    return assigned["train"], assigned["val"]
+
+
+# train / val split을 클래스 층화 기준으로 수행
+train_images, val_images = stratified_split(image_meta, class_map, TRAIN_RATIO, SEED)
+
+# 분할 결과 검증: 각 subset에서 인스턴스가 0개인 클래스가 있는지 확인
+for mode, images in (("train", train_images), ("val", val_images)):
+    present = Counter()
+    for name in images:
+        present.update(
+            class_map[ann["category_id"]] for ann in image_meta[name]["anns"]
+        )
+    missing = [category_dict[cid] for cid in category_ids if class_map[cid] not in present]
+    print(f"{mode}: {len(images)} images, {len(present)}/{len(category_ids)} classes present"
+          + (f", missing: {missing}" if missing else ""))
 
 
 def find_image(image_name: str) -> Path | None:
-    # Fix 3: 올바른 경로로 직접 탐색
     candidate = IMAGE_ROOT / image_name
     if candidate.exists():
         return candidate
