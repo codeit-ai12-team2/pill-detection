@@ -1,0 +1,8 @@
+model: ./runs/detect/yolo11s-2/weights/best.pt
+
+imgsz: 640
+conf: 0.25
+iou: 0.7
+
+test_dir: ../../data/raw/test_images
+class_mapping_file: ../../data/processed/yolo/class_mapping.json

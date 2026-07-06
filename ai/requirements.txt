@@ -1,0 +1,15 @@
+numpy
+pandas
+matplotlib
+seaborn
+opencv-python
+pillow
+ultralytics
+ipykernel
+jupyter
+gdown
+albumentations
+matplotlib
+tqdm
+ultralytics
+pandas
