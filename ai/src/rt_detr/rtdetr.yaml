@@ -1,0 +1,2 @@
+model: rtdetr-l.pt
+name: rtdetr-l
