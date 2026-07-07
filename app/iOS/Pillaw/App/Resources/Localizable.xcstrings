@@ -1,16 +1,13 @@
 {
   "sourceLanguage" : "ko",
   "strings" : {
-    "Add Item" : {
+    "Camera" : {
 
     },
-    "CameraView" : {
+    "Camera access is required to detect pills." : {
 
     },
     "HomeView" : {
-
-    },
-    "Item at %@" : {
 
     },
     "Move to CameraView" : {
@@ -19,10 +16,10 @@
     "Move to PillInfoView" : {
 
     },
-    "PillInfoView" : {
+    "Open Settings" : {
 
     },
-    "Select an item" : {
+    "PillInfoView" : {
 
     },
     "SplashView" : {

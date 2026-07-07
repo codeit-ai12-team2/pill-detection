@@ -11,6 +11,13 @@ struct HomeView: View {
     @Environment(AppRouter.self)
     private var router
     
+    @State
+    private var vm: HomeVM
+    
+    init(vm: HomeVM) {
+        _vm = State(initialValue: vm)
+    }
+    
     var body: some View {
         VStack {
             Text("HomeView")
@@ -25,5 +32,7 @@ struct HomeView: View {
 }
 
 #Preview {
-    HomeView()
+    HomeView (
+        vm: PreviewContainer.shared.makeHomeVM()
+    )
 }

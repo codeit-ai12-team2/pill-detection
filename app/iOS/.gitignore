@@ -2,6 +2,9 @@
 #
 # gitignore contributors: remember to update Global/Xcode.gitignore, Objective-C.gitignore & Swift.gitignore
 
+## Secrets (copy Secrets.swift.example to Secrets.swift and fill in real keys)
+Pillaw/App/Config/Secrets.swift
+
 ## User settings
 xcuserdata/
 

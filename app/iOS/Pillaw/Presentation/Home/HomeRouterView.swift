@@ -15,7 +15,7 @@ struct HomeRouterView: View {
         @Bindable var router = router
         
         NavigationStack(path: $router.path) {
-            HomeView()
+            HomeView(vm: AppContainer.shared.makeHomeVM())
                 .navigationDestination(for: Route.self) {
                     RouterDestination.view(for: $0)
                 }

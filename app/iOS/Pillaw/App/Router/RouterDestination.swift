@@ -8,10 +8,13 @@ import SwiftUI
 
 enum RouterDestination {
     @ViewBuilder
-    static func view(for route: Route) -> some View {
+    static func view (
+        for route: Route,
+        container: AppContainer? = nil
+    ) -> some View {
         switch route {
         case .camera:
-            CameraView()
+            CameraView(vm: (container ?? .shared).makeCameraVM())
         case .pillInfo(let id):
             PillInfoView()
         }
