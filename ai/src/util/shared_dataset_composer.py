@@ -5,6 +5,8 @@ from collections import Counter
 from pathlib import Path
 from tqdm import tqdm
 
+import background_extractor as bg
+
 # 설정
 IMAGE_ROOT = Path("../../data/raw/train_images")
 ANNOT_ROOT = Path("../../data/raw/train_annotations")
@@ -13,6 +15,7 @@ OUTPUT = Path("../../data/processed/shared")
 
 TRAIN_RATIO = 0.8
 SEED = 42
+NUM_BACKGROUNDS = 30
 
 random.seed(SEED)
 
@@ -237,8 +240,35 @@ def convert(image_names: list[str], mode: str):
                 )
 
 
+def add_background_images(output_dir: Path, num_backgrounds: int, seed: int) -> None:
+    """알약이 없는 배경 이미지를 train 전용 negative 샘플로 추가합니다.
+
+    YOLO 는 라벨이 없는(빈 txt) 이미지를 배경으로 학습해 오탐(false positive)을 줄이는 데
+    사용합니다. val 로 배경이 새면 학습에 쓰이지 않은 배경 성능을 왜곡해서 측정하게 되므로
+    train 에만 추가합니다.
+
+    Args:
+        output_dir: shared 데이터셋 루트 디렉토리.
+        num_backgrounds: 추가할 배경 이미지 수.
+        seed: background_extractor 이미지 샘플링에 사용할 랜덤 seed.
+    """
+    image_bboxes = bg.collect_image_bboxes(ANNOT_ROOT)
+    background_names = bg.select_background_images(image_bboxes, num_backgrounds, seed)
+
+    background_paths = bg.extract_backgrounds(background_names, IMAGE_ROOT, image_bboxes, bg.OUTPUT)
+
+    for background_path in tqdm(background_paths, desc="Adding backgrounds\t"):
+        shutil.copy(background_path, output_dir / "images/train" / background_path.name)
+
+        label_path = output_dir / "labels/train" / f"{background_path.stem}.txt"
+        label_path.touch()
+
+    print(f"Added {len(background_paths)} background (empty-label) images to train")
+
+
 convert(train_images, "train")
 convert(val_images, "val")
+add_background_images(OUTPUT, NUM_BACKGROUNDS, SEED)
 
 # dataset.yaml
 with open(OUTPUT / "dataset.yaml", "w", encoding="utf-8") as f:
