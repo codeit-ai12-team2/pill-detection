@@ -54,6 +54,14 @@ final class Pill {
     var ediCode: String?
     var bizrno: String?
     var stdCd: String?
+    
+    init() {
+        itemSeq = "198700706"
+        itemName = "보령부스파정"
+        classIndex = 0
+        dlName = "보령부스파정"
+        categoryId = "1900"
+    }
 
     init(dto: PillDTO, mapping: ClassMapping) {
         itemSeq = dto.itemSeq

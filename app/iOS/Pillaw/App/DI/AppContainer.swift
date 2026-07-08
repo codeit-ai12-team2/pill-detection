@@ -10,7 +10,10 @@ import Foundation
 final class AppContainer {
     static let shared = AppContainer()
 
-    private lazy var cameraRepo: CameraRepo = CameraRepoImpl()
+    private lazy var pillDetector: PillDetectorRepo = PillDetectorRepoImpl(
+        mappings: ClassMapping.parse(csv: classMappingCSV)
+    )
+    private lazy var cameraRepo: CameraRepo = CameraRepoImpl(detector: pillDetector)
     private lazy var networkClient: NetworkClient = NetworkClientImpl()
     private lazy var pillRepo: PillRepo = PillRepoImpl(networkClient: networkClient)
 

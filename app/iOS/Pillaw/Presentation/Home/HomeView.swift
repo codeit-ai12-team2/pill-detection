@@ -6,10 +6,14 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct HomeView: View {
     @Environment(AppRouter.self)
     private var router
+    
+    @Environment(\.modelContext)
+    private var modelContext
     
     @State
     private var vm: HomeVM
@@ -19,7 +23,18 @@ struct HomeView: View {
     }
     
     var body: some View {
+//        ScrollView {
+//            LazyVStack {
+//                ForEach(vm.pills, id: \.classIndex) { pill in
+//                    PillCardView(pill: pill)
+//                        .padding(.horizontal, 20)
+//                }
+//            }.task {
+//                await vm.loadPills(context: modelContext)
+//            }
+//        }
         VStack {
+            Text("HomeView")
             Text("HomeView")
             Button("Move to CameraView") {
                 router.push(.camera)

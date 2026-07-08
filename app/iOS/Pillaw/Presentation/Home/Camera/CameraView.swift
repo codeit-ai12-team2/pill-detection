@@ -6,10 +6,14 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct CameraView: View {
     @Environment(\.openURL)
     private var openURL
+
+    @Environment(\.modelContext)
+    private var modelContext
 
     @State
     private var vm: CameraVM
@@ -34,15 +38,48 @@ struct CameraView: View {
                 permissionDeniedView
             }
         }
+        .overlay(alignment: .bottom) {
+            if vm.permission == .granted {
+                detectedPillList
+            }
+        }
         .navigationTitle("Camera")
         .navigationBarTitleDisplayMode(.inline)
         .task {
             await vm.startCamera()
         }
+        .task {
+            await vm.startDetection(context: modelContext)
+        }
         .onDisappear {
             Task {
                 await vm.stopCamera()
             }
+        }
+    }
+
+    @ViewBuilder
+    private var detectedPillList: some View {
+        if !vm.isDetectionAvailable {
+            Text("감지 모델이 아직 준비되지 않았어요.")
+                .font(.caption)
+                .foregroundStyle(.white)
+                .padding(8)
+                .background(.black.opacity(0.5), in: .capsule)
+                .padding(.bottom, 16)
+        } else if !vm.detectedPills.isEmpty {
+            ScrollView {
+                LazyVStack(spacing: 8) {
+                    ForEach(vm.detectedPills, id: \.itemSeq) { pill in
+                        PillCardView(pill: pill)
+                    }
+                }
+                .padding(12)
+            }
+            .frame(maxHeight: 220)
+            .background(.ultraThinMaterial, in: .rect(cornerRadius: 20))
+            .padding(.horizontal, 16)
+            .padding(.bottom, 16)
         }
     }
 

@@ -13,7 +13,11 @@ final class PreviewContainer {
     }
 
     func makeCameraVM() -> CameraVM {
-        CameraVM(cameraRepo: CameraRepoImpl())
+        CameraVM(
+            cameraRepo: CameraRepoImpl(
+                detector: PillDetectorRepoImpl(mappings: [])
+            )
+        )
     }
 
     func makeSplashVM() -> SplashVM {
