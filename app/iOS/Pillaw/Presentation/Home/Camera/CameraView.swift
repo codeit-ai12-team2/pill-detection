@@ -34,6 +34,11 @@ struct CameraView: View {
             case .granted:
                 CameraPreview(session: vm.session)
                     .ignoresSafeArea()
+                if vm.showsBoundingBoxes {
+                    boundingBoxOverlay
+                        .ignoresSafeArea()
+                        .allowsHitTesting(false)
+                }
             case .denied:
                 permissionDeniedView
             }
@@ -45,6 +50,21 @@ struct CameraView: View {
         }
         .navigationTitle("Camera")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            if vm.permission == .granted, vm.isDetectionAvailable {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        vm.showsBoundingBoxes.toggle()
+                    } label: {
+                        Image(
+                            systemName: vm.showsBoundingBoxes
+                                ? "rectangle.dashed.badge.record"
+                                : "rectangle.dashed"
+                        )
+                    }
+                }
+            }
+        }
         .task {
             await vm.startCamera()
         }
@@ -56,6 +76,57 @@ struct CameraView: View {
                 await vm.stopCamera()
             }
         }
+    }
+
+    /// 프리뷰(aspect-fill) 위에 감지 bbox를 그린다.
+    private var boundingBoxOverlay: some View {
+        GeometryReader { geometry in
+            let content = aspectFillRect(for: vm.detectionFrameSize, in: geometry.size)
+            ForEach(vm.detectionBoxes) { box in
+                let rect = CGRect(
+                    x: content.minX + box.rect.minX * content.width,
+                    y: content.minY + box.rect.minY * content.height,
+                    width: box.rect.width * content.width,
+                    height: box.rect.height * content.height
+                )
+                RoundedRectangle(cornerRadius: 4)
+                    .stroke(.yellow, lineWidth: 2)
+                    .overlay(alignment: .topLeading) {
+                        Text("\(box.name ?? "?") \(Int(box.confidence * 100))%")
+                            .font(.caption2.bold())
+                            .foregroundStyle(.black)
+                            .padding(.horizontal, 4)
+                            .padding(.vertical, 2)
+                            .background(.yellow, in: .rect(cornerRadius: 4))
+                            .fixedSize()
+                            // 라벨을 박스 위쪽에 얹는다
+                            .alignmentGuide(.top) { $0[.bottom] }
+                    }
+                    .frame(width: rect.width, height: rect.height)
+                    .position(x: rect.midX, y: rect.midY)
+            }
+        }
+    }
+
+    /// 프레임이 aspect-fill로 표시될 때 화면에서 차지하는 영역 (화면 밖으로 벗어난 부분 포함)
+    private func aspectFillRect(for frameSize: CGSize, in viewSize: CGSize) -> CGRect {
+        guard frameSize.width > 0, frameSize.height > 0 else {
+            return CGRect(origin: .zero, size: viewSize)
+        }
+        let scale = max(
+            viewSize.width / frameSize.width,
+            viewSize.height / frameSize.height
+        )
+        let size = CGSize(
+            width: frameSize.width * scale,
+            height: frameSize.height * scale
+        )
+        return CGRect(
+            x: (viewSize.width - size.width) / 2,
+            y: (viewSize.height - size.height) / 2,
+            width: size.width,
+            height: size.height
+        )
     }
 
     @ViewBuilder

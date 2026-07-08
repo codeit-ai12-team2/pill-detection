@@ -1,6 +1,16 @@
 {
   "sourceLanguage" : "ko",
   "strings" : {
+    "%@ %lld%%" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ %2$lld%%"
+          }
+        }
+      }
+    },
     "Camera" : {
 
     },
@@ -48,17 +58,10 @@
     "다시 시도" : {
 
     },
-    "알약 데이터 준비 중… (%lld/%lld)" : {
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "알약 데이터 준비 중… (%1$lld/%2$lld)"
-          }
-        }
-      }
+    "사진으로 알약을 확인해요" : {
+
     },
-    "알약 데이터 확인 중…" : {
+    "필요한 정보를 불러오고 있어요" : {
 
     }
   },

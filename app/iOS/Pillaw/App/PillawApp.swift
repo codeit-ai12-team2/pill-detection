@@ -14,8 +14,12 @@ struct PillawApp: App {
 
     var body: some Scene {
         WindowGroup {
-            RootView()
-                .environment(appState)
+            ZStack {
+                Color.bridalHealth
+                    .ignoresSafeArea()
+                RootView()
+                    .environment(appState)
+            }
         }
         .modelContainer(for: Pill.self)
     }
