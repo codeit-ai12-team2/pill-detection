@@ -6,7 +6,7 @@
 //
 import Foundation
 
-enum Route: Hashable {
+nonisolated enum Route: Hashable {
     case camera
     case pillInfo(id: String)
 }

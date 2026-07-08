@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct RootView: View {
     @Environment(AppState.self)
@@ -16,7 +17,7 @@ struct RootView: View {
     var body: some View {
         switch appState.root {
         case .splash:
-            SplashView()
+            SplashView(vm: AppContainer.shared.makeSplashVM())
         case .home:
             HomeRouterView()
                 .environment(appRouter)
@@ -26,4 +27,6 @@ struct RootView: View {
 
 #Preview {
     RootView()
+        .environment(AppState())
+        .modelContainer(for: Pill.self, inMemory: true)
 }

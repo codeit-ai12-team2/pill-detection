@@ -15,4 +15,14 @@ final class PreviewContainer {
     func makeCameraVM() -> CameraVM {
         CameraVM(cameraRepo: CameraRepoImpl())
     }
+
+    func makeSplashVM() -> SplashVM {
+        SplashVM(
+            pillRepo: PillRepoImpl(networkClient: NetworkClientImpl()),
+            classMappingCSV: """
+            class_index,dl_name,category_id,item_seq
+            0,보령부스파정 5mg,1900,198700706
+            """
+        )
+    }
 }

@@ -7,8 +7,6 @@
 
 import Foundation
 
-/// The remote services the app talks to. Each case carries its own base URL
-/// and default auth, so one NetworkClient can serve them all.
 nonisolated enum API {
     /// 의약품 정보 조회 API
     case pillInfo
@@ -16,16 +14,19 @@ nonisolated enum API {
     var baseURLString: String {
         switch self {
         case .pillInfo:
-            // TODO: 실제 사용할 API의 base URL로 교체
-            "https://apis.data.go.kr/1471000/MdcinGrnIdntfcInfoService02"
+            "https://apis.data.go.kr/1471000/MdcinGrnIdntfcInfoService03/getMdcinGrnIdntfcInfoList03"
         }
     }
 
-    /// Query items this API requires on every request (e.g. service keys).
     var defaultQueryItems: [URLQueryItem] {
         switch self {
         case .pillInfo:
-            [URLQueryItem(name: "serviceKey", value: Secrets.pillInfoAPIKey)]
+            [
+                URLQueryItem(name: "serviceKey", value: Secrets.GOV_API_KEY),
+                URLQueryItem(name: "type", value: "json"),
+                URLQueryItem(name: "pageNo", value: "1"),
+                URLQueryItem(name: "numOfRows", value: "10")
+            ]
         }
     }
 
