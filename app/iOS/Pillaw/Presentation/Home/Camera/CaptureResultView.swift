@@ -148,8 +148,10 @@ struct CaptureResultSheet: View {
                                         Text(pill.itemName)
                                             .font(.griunMongtori(size: 19))
                                             .foregroundStyle(.armadillo)
-                                        // - FIX: 알약 복용 정보 연동
-                                        PillDurationView()
+                                            .multilineTextAlignment(.leading)
+                                        if let dosage = detection.firstDosage {
+                                            PillDurationView(durationContent: dosage)
+                                        }
                                     }
                                     Spacer()
                                     Image(.icArrowRight)
@@ -208,7 +210,7 @@ struct NumberBadge: View {
 #Preview("결과 시트") {
     CaptureResultSheet(
         detections: [
-            .init(number: 1, rect: .zero, pill: Pill(), confidence: 0.9),
+            .init(number: 1, rect: .zero, pill: Pill(), confidence: 0.9, firstDosage: "1일 3회 1정"),
             .init(number: 2, rect: .zero, pill: nil, confidence: 0.8)
         ],
         onClose: {},

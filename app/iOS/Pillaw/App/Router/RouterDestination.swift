@@ -16,7 +16,7 @@ enum RouterDestination {
         case .camera:
             StaticCameraView(vm: (container ?? .shared).makeCameraVM())
         case .pillInfo(let id):
-            PillInfoView()
+            PillInfoView(itemSeq: id, vm: (container ?? .shared).makePillInfoVM())
         case .pillInfoBanned:
             PillInfoInvalidView()
         case .favorite:

@@ -24,6 +24,10 @@ final class PreviewContainer {
         FavoriteVM()
     }
 
+    func makePillInfoVM() -> PillInfoVM {
+        PillInfoVM()
+    }
+
     func makeSplashVM() -> SplashVM {
         SplashVM(
             pillRepo: PillRepoImpl(networkClient: NetworkClientImpl()),

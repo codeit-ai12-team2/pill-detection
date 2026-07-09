@@ -46,6 +46,10 @@ final class AppContainer {
         FavoriteVM()
     }
 
+    func makePillInfoVM() -> PillInfoVM {
+        PillInfoVM()
+    }
+
     func makeSplashVM() -> SplashVM {
         SplashVM(
             pillRepo: pillRepo,

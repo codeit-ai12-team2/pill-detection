@@ -29,6 +29,11 @@ struct StaticCameraView: View {
     @State
     private var previewSize: CGSize = .zero
 
+    /// 알약 상세 화면으로 이동하는 동안 시트를 숨기기 위한 플래그.
+    /// 촬영 결과는 유지되므로 돌아오면 시트가 같은 내용으로 다시 나타난다.
+    @State
+    private var isNavigatingToDetail = false
+
     /// 시트를 끝까지 내렸을 때 title 영역만 남는 높이
     private let collapsedDetent = PresentationDetent.height(76)
 
@@ -64,6 +69,10 @@ struct StaticCameraView: View {
         .task {
             await vm.startCamera()
         }
+        .onAppear {
+            // 상세 화면에서 돌아오면 유지된 촬영 결과로 시트를 다시 띄운다
+            isNavigatingToDetail = false
+        }
         .onDisappear {
             Task {
                 await vm.stopCamera()
@@ -74,11 +83,10 @@ struct StaticCameraView: View {
                 detections: vm.capturedDetections,
                 onClose: { vm.returnToCamera() },
                 onClickItem: { pill in
-                    vm.returnToCamera()
+                    isNavigatingToDetail = true
                     if let pill = pill {
                         if (pill.status == .normal) {
                             router.push(.pillInfo(id: pill.itemSeq))
-//                            router.push(.pillInfoBanned)
                         } else {
                             router.push(.pillInfoBanned)
                         }
@@ -126,13 +134,13 @@ struct StaticCameraView: View {
         }
     }
 
-    /// result 모드에서만 시트를 띄운다.
+    /// result 모드에서만 시트를 띄운다. 상세 화면으로 이동 중에는 숨긴다.
     /// 스와이프로는 title 영역(collapsedDetent)까지만 줄어들고, close 버튼으로만 닫힌다.
     private var isResultPresented: Binding<Bool> {
         Binding(
-            get: { vm.mode == .result },
+            get: { vm.mode == .result && !isNavigatingToDetail },
             set: { isPresented in
-                if !isPresented { vm.returnToCamera() }
+                if !isPresented && !isNavigatingToDetail { vm.returnToCamera() }
             }
         )
     }

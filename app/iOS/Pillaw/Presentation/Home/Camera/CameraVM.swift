@@ -47,6 +47,8 @@ final class CameraVM {
         /// DB에서 찾은 알약 정보. 매핑이 없거나 저장되지 않은 알약이면 nil.
         let pill: Pill?
         let confidence: Float
+        /// 첫 번째 용법 (dosage_all[0]). 용법 정보가 없으면 nil.
+        var firstDosage: String? = nil
     }
 
     private let cameraRepo: CameraRepo
@@ -190,12 +192,19 @@ final class CameraVM {
 
         fetchMissingPills(converted.compactMap { $0.detection.categoryId }, context: context)
 
+        let itemSeqs = converted.compactMap { item in
+            item.detection.categoryId.flatMap { pillCache[$0]?.itemSeq }
+        }
+        let dosages = (try? PillDetail.firstDosages(for: itemSeqs, context: context)) ?? [:]
+
         capturedDetections = converted.enumerated().map { index, item in
-            CapturedDetection(
+            let pill = item.detection.categoryId.flatMap { pillCache[$0] }
+            return CapturedDetection(
                 number: index + 1,
                 rect: item.rect,
-                pill: item.detection.categoryId.flatMap { pillCache[$0] },
-                confidence: item.detection.confidence
+                pill: pill,
+                confidence: item.detection.confidence,
+                firstDosage: pill.flatMap { dosages[$0.itemSeq] }
             )
         }
         capturedImage = frame.image
