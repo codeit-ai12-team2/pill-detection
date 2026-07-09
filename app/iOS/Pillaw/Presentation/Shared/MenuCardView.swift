@@ -40,6 +40,7 @@ struct MenuCardView<Content: View>: View {
                 Text(title)
                     .font(.griunMongtori(size: 22))
                     .foregroundStyle(.armadillo)
+                    .multilineTextAlignment(.leading)
                 content
             }
             Spacer()
