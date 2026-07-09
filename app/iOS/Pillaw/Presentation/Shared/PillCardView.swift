@@ -35,9 +35,6 @@ struct PillCardView: View {
                     }
                 }
                 .pipeline(.pillImages)
-                .onAppear {
-                    dump("url: \(url)")
-                }
             } else {
                 RoundedRectangle(cornerRadius: 20)
                     .fill(.gray)

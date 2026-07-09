@@ -6,11 +6,20 @@
 //
 
 import Foundation
+import CoreGraphics
 
 /// 카메라 프레임 한 장의 감지 결과.
 nonisolated struct DetectionFrame: Sendable {
     let detections: [PillDetection]
     /// 감지에 사용된 프레임 크기(픽셀, 회전 적용 후). bbox를 화면 좌표로 변환할 때 사용.
+    let size: CGSize
+}
+
+/// 촬영 버튼을 눌렀을 때의 정지 프레임과 감지 결과.
+nonisolated struct CapturedFrame: Sendable {
+    let image: CGImage
+    let detections: [PillDetection]
+    /// 프레임 크기(픽셀, 회전 적용 후)
     let size: CGSize
 }
 

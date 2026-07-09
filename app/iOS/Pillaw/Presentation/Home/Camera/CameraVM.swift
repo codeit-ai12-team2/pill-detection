@@ -23,6 +23,12 @@ final class CameraVM {
         case denied
     }
 
+    /// 촬영 화면의 표시 모드. 촬영 전에는 라이브 프리뷰, 촬영 후에는 정지 화면 + 결과.
+    enum Mode {
+        case camera
+        case result
+    }
+
     /// 카메라 프리뷰 위에 그릴 bounding box 하나.
     struct DetectionBox: Identifiable {
         let id = UUID()
@@ -32,9 +38,33 @@ final class CameraVM {
         let confidence: Float
     }
 
+    /// 촬영된 프레임에서 감지된 알약 하나. 화면 위쪽부터 순서대로 번호가 매겨진다.
+    struct CapturedDetection: Identifiable, Equatable {
+        let id = UUID()
+        let number: Int
+        /// 프레임 기준 정규화 좌표 (좌상단 원점, 0~1)
+        let rect: CGRect
+        /// DB에서 찾은 알약 정보. 매핑이 없거나 저장되지 않은 알약이면 nil.
+        let pill: Pill?
+        let confidence: Float
+    }
+
     private let cameraRepo: CameraRepo
 
     var permission: PermissionState = .unknown
+
+    var mode: Mode = .camera
+
+    var isTorchOn = false
+
+    /// 촬영된 정지 프레임. result 모드에서만 값이 있다.
+    var capturedImage: CGImage?
+
+    /// 촬영 프레임 크기(픽셀). bbox를 aspect-fill 화면 좌표로 변환할 때 사용.
+    var capturedFrameSize: CGSize = .zero
+
+    /// 촬영 프레임의 감지 결과 (위에서부터 번호순)
+    var capturedDetections: [CapturedDetection] = []
 
     /// 현재 카메라에 잡혀 있는 알약 목록 (먼저 감지된 순, 중복 없음)
     var detectedPills: [Pill] = []
@@ -111,7 +141,7 @@ final class CameraVM {
                 return false
             }
 
-            fetchMissingPills(context: context)
+            fetchMissingPills(visibleCategoryIds, context: context)
 
             let pills = visibleCategoryIds.compactMap { pillCache[$0] }
             if pills.map(\.itemSeq) != detectedPills.map(\.itemSeq) {
@@ -122,8 +152,87 @@ final class CameraVM {
         }
     }
 
-    private func fetchMissingPills(context: ModelContext) {
-        let missingIds = visibleCategoryIds.filter { pillCache[$0] == nil }
+    func toggleTorch() async {
+        isTorchOn = await cameraRepo.setTorch(!isTorchOn)
+    }
+
+    /// 현재 프레임을 촬영하고 감지 결과에 위에서부터 번호를 매겨 result 모드로 전환한다.
+    /// - Parameter viewSize: 프리뷰가 표시되는 화면 크기.
+    ///   aspect-fill로 잘려나가 화면에 보이지 않는 영역의 감지는 결과에서 제외한다.
+    func capture(viewSize: CGSize, context: ModelContext) async {
+        guard let frame = await cameraRepo.capture() else { return }
+
+        if isTorchOn {
+            isTorchOn = await cameraRepo.setTorch(false)
+        }
+
+        let visible = visibleRect(frameSize: frame.size, viewSize: viewSize)
+
+        // Vision 좌표(좌하단 원점) → SwiftUI 좌표(좌상단 원점)
+        var converted: [(rect: CGRect, detection: PillDetection)] = frame.detections.compactMap { detection in
+            let box = detection.boundingBox
+            let rect = CGRect(
+                x: box.minX,
+                y: 1 - box.maxY,
+                width: box.width,
+                height: box.height
+            )
+            // 중심점이 화면에 보이지 않는 감지는 제외
+            guard visible.contains(CGPoint(x: rect.midX, y: rect.midY)) else { return nil }
+            return (rect: rect, detection: detection)
+        }
+        // 화면 위쪽부터 순서대로 번호를 매긴다 (같은 높이면 왼쪽 우선)
+        converted.sort { lhs, rhs in
+            lhs.rect.minY == rhs.rect.minY
+                ? lhs.rect.minX < rhs.rect.minX
+                : lhs.rect.minY < rhs.rect.minY
+        }
+
+        fetchMissingPills(converted.compactMap { $0.detection.categoryId }, context: context)
+
+        capturedDetections = converted.enumerated().map { index, item in
+            CapturedDetection(
+                number: index + 1,
+                rect: item.rect,
+                pill: item.detection.categoryId.flatMap { pillCache[$0] },
+                confidence: item.detection.confidence
+            )
+        }
+        capturedImage = frame.image
+        capturedFrameSize = frame.size
+        mode = .result
+    }
+
+    /// 프레임이 aspect-fill로 표시될 때 실제 화면에 보이는 영역 (프레임 기준 정규화 좌표, 좌상단 원점).
+    /// 프레임과 화면의 비율 차이로 잘려나가는 가장자리를 제외한 부분이다.
+    private func visibleRect(frameSize: CGSize, viewSize: CGSize) -> CGRect {
+        let full = CGRect(x: 0, y: 0, width: 1, height: 1)
+        guard frameSize.width > 0, frameSize.height > 0,
+              viewSize.width > 0, viewSize.height > 0 else { return full }
+
+        let scale = max(
+            viewSize.width / frameSize.width,
+            viewSize.height / frameSize.height
+        )
+        let visibleWidth = min(1, viewSize.width / (frameSize.width * scale))
+        let visibleHeight = min(1, viewSize.height / (frameSize.height * scale))
+        return CGRect(
+            x: (1 - visibleWidth) / 2,
+            y: (1 - visibleHeight) / 2,
+            width: visibleWidth,
+            height: visibleHeight
+        )
+    }
+
+    /// 촬영 결과를 버리고 라이브 카메라로 돌아간다.
+    func returnToCamera() {
+        mode = .camera
+        capturedImage = nil
+        capturedDetections = []
+    }
+
+    private func fetchMissingPills(_ ids: [String], context: ModelContext) {
+        let missingIds = ids.filter { pillCache[$0] == nil }
         guard !missingIds.isEmpty else { return }
 
         do {

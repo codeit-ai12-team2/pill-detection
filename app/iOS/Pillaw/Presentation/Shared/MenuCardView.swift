@@ -7,12 +7,20 @@
 
 import SwiftUI
 
-struct MenuCardView: View {
+struct MenuCardView<Content: View>: View {
     let icon: ImageResource
     let iconTint: Color
     let iconBGTint: Color
     let title: String
-    let content: String
+    let content: Content
+    
+    init(icon: ImageResource, iconTint: Color, iconBGTint: Color, title: String, @ViewBuilder content: () -> Content) {
+        self.icon = icon
+        self.iconTint = iconTint
+        self.iconBGTint = iconBGTint
+        self.title = title
+        self.content = content()
+    }
     
     var body: some View {
         HStack(alignment: .center, spacing: 16)   {
@@ -28,13 +36,11 @@ struct MenuCardView: View {
             .clipShape(.rect(cornerRadius: 18))
             
             // content
-            VStack(alignment: .leading, spacing: 3) {
+            VStack(alignment: .leading, spacing: 5) {
                 Text(title)
                     .font(.griunMongtori(size: 22))
                     .foregroundStyle(.armadillo)
-                Text(content)
-                    .font(.griunMongtori(size: 15))
-                    .foregroundStyle(.makara)
+                content
             }
             Spacer()
             Image(.icArrowRight)
@@ -62,6 +68,6 @@ struct MenuCardView: View {
         iconTint: .steelBlue,
         iconBGTint: .hawkesBlue,
         title: "Title",
-        content: "Content"
+        content: {}
     )
 }

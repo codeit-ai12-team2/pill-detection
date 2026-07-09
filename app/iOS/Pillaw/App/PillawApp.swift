@@ -21,6 +21,6 @@ struct PillawApp: App {
                     .environment(appState)
             }
         }
-        .modelContainer(for: Pill.self)
+        .modelContainer(for: [Pill.self, PillDetail.self])
     }
 }

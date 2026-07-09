@@ -19,8 +19,16 @@ final class AppContainer {
 
     /// 번들 리소스 로딩은 조립 지점의 책임 — Data 레이어는 문자열만 받는다.
     private var classMappingCSV: String {
+        bundleCSV(named: "class_mapping")
+    }
+
+    private var pillDetailCSV: String {
+        bundleCSV(named: "pill_detail_mapping")
+    }
+
+    private func bundleCSV(named name: String) -> String {
         guard
-            let url = Bundle.main.url(forResource: "class_mapping", withExtension: "csv"),
+            let url = Bundle.main.url(forResource: name, withExtension: "csv"),
             let content = try? String(contentsOf: url, encoding: .utf8)
         else { return "" }
         return content
@@ -34,7 +42,15 @@ final class AppContainer {
         CameraVM(cameraRepo: cameraRepo)
     }
 
+    func makeFavoriteVM() -> FavoriteVM {
+        FavoriteVM()
+    }
+
     func makeSplashVM() -> SplashVM {
-        SplashVM(pillRepo: pillRepo, classMappingCSV: classMappingCSV)
+        SplashVM(
+            pillRepo: pillRepo,
+            classMappingCSV: classMappingCSV,
+            pillDetailCSV: pillDetailCSV
+        )
     }
 }

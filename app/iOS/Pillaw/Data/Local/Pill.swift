@@ -17,6 +17,12 @@ final class Pill {
     /// 정보 상태 (정상 / 정보를 찾을 수 없음 / 복용 금지)
     var status: PillStatus = PillStatus.normal
 
+    /// 즐겨찾기 여부
+    var isFavorite: Bool = false
+
+    /// 즐겨찾기한 시각 (즐겨찾기 목록 정렬용)
+    var favoritedAt: Date?
+
     // class_mapping.csv (YOLO 클래스 매핑) 정보
     var classIndex: Int
     var dlName: String
@@ -111,5 +117,11 @@ final class Pill {
         classIndex = mapping.classIndex
         dlName = mapping.dlName
         categoryId = mapping.categoryId
+    }
+
+    /// 즐겨찾기를 토글한다. SwiftData가 자동 저장하므로 호출부에서 따로 save할 필요 없다.
+    func toggleFavorite() {
+        isFavorite.toggle()
+        favoritedAt = isFavorite ? .now : nil
     }
 }

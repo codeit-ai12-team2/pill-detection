@@ -14,11 +14,13 @@ enum RouterDestination {
     ) -> some View {
         switch route {
         case .camera:
-            RealTimeCameraView(vm: (container ?? .shared).makeCameraVM())
+            StaticCameraView(vm: (container ?? .shared).makeCameraVM())
         case .pillInfo(let id):
             PillInfoView()
+        case .pillInfoBanned:
+            PillInfoInvalidView()
         case .favorite:
-            FavoriteView()
+            FavoriteView(vm: (container ?? .shared).makeFavoriteVM())
         }
     }
 }

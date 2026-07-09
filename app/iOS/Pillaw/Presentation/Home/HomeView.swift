@@ -69,12 +69,20 @@ struct HomeView: View {
                     Button(action: {
                         router.push(.camera)
                     }) {
-                        MenuCardView(icon: .icCamera, iconTint: .steelBlue, iconBGTint: .hawkesBlue, title: "카메라로 인식", content: "알약을 촬영해서 정보를 확인해요")
+                        MenuCardView(icon: .icCamera, iconTint: .steelBlue, iconBGTint: .hawkesBlue, title: "카메라로 인식") {
+                            Text("알약을 촬영해서 정보를 확인해요")
+                                .font(.griunMongtori(size: 15))
+                                .foregroundStyle(.makara)
+                        }
                     }
                     Button(action: {
                         router.push(.favorite)
                     }) {
-                        MenuCardView(icon: .icStar, iconTint: .webOrange, iconBGTint: .eggWhite, title: "즐겨찾는 알약", content: "자주 찾는 알약을 바로 확인해요")
+                        MenuCardView(icon: .icStar, iconTint: .webOrange, iconBGTint: .eggWhite, title: "즐겨찾는 알약") {
+                            Text("자주 찾는 알약을 바로 확인해요")
+                                .font(.griunMongtori(size: 15))
+                                .foregroundStyle(.makara)
+                        }
                     }
                 }
             }

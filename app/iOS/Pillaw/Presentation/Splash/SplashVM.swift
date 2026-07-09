@@ -26,6 +26,7 @@ final class SplashVM {
 
     private let pillRepo: PillRepo
     private let classMappingCSV: String
+    private let pillDetailCSV: String
 
     var phase: Phase = .checking
 
@@ -34,9 +35,10 @@ final class SplashVM {
         return false
     }
 
-    init(pillRepo: PillRepo, classMappingCSV: String) {
+    init(pillRepo: PillRepo, classMappingCSV: String, pillDetailCSV: String) {
         self.pillRepo = pillRepo
         self.classMappingCSV = classMappingCSV
+        self.pillDetailCSV = pillDetailCSV
     }
 
     /// 저장된 알약 데이터가 없으면 class_mapping.csv의 item_seq들로
@@ -51,6 +53,8 @@ final class SplashVM {
         }
 
         do {
+            try seedPillDetailsIfNeeded(context: context)
+
             let saved = Set(try context.fetch(FetchDescriptor<Pill>()).map(\.itemSeq))
             let targets = mappings.filter { !saved.contains($0.itemSeq) }
 
@@ -131,5 +135,25 @@ final class SplashVM {
             logger.error("시딩 실패: \(String(describing: error), privacy: .public)")
             phase = .failed(message: "데이터 준비에 실패했어요.")
         }
+    }
+
+    /// pill_detail_mapping.csv의 알약 상세 정보를 SwiftData에 저장한다.
+    /// 네트워크 없이 번들 CSV만 사용하며, 이미 저장된 item_seq는 건너뛴다.
+    private func seedPillDetailsIfNeeded(context: ModelContext) throws {
+        let details = PillDetail.parse(csv: pillDetailCSV)
+        guard !details.isEmpty else {
+            logger.error("pill_detail_mapping CSV가 비어 있거나 파싱에 실패함")
+            return
+        }
+
+        let saved = Set(try context.fetch(FetchDescriptor<PillDetail>()).map(\.itemSeq))
+        let targets = details.filter { !saved.contains($0.itemSeq) }
+        guard !targets.isEmpty else { return }
+
+        for detail in targets {
+            context.insert(detail)
+        }
+        try context.save()
+        logger.info("알약 상세 정보 시딩 완료: \(targets.count)건")
     }
 }
