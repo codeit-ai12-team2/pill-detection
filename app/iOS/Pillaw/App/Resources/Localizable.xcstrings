@@ -17,13 +17,7 @@
     "Camera access is required to detect pills." : {
 
     },
-    "HomeView" : {
-
-    },
-    "Move to CameraView" : {
-
-    },
-    "Move to PillInfoView" : {
+    "Hello, World!" : {
 
     },
     "Open Settings" : {
@@ -59,6 +53,12 @@
 
     },
     "사진으로 알약을 확인해요" : {
+
+    },
+    "어떻게 확인할까요?" : {
+
+    },
+    "원하는 방법을 선택해 주세요" : {
 
     },
     "필요한 정보를 불러오고 있어요" : {

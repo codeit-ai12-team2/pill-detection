@@ -60,7 +60,7 @@ struct SplashView: View {
                 default:
                     // dotLottie(.lottie) 파일이라 LottieAnimation이 아닌 DotLottieFile로 로드한다
                     LottieView {
-                        try await DotLottieFile.named("pillaw_loading_animation")
+                        try await DotLottieFile.named("loading_animation")
                     }
                     .looping()
                     Text("필요한 정보를 불러오고 있어요")
@@ -99,12 +99,13 @@ struct SplashView: View {
             Spacer()
                 .frame(height: 40)
         }
-//        .task {
-//            Task {
-//                try await Task.sleep(for: .seconds(3))
-//                await seed()
-//            }
-//        }
+        // splash를 고정시키려면 task block을 주석 처리합니다
+        .task {
+            Task {
+                try await Task.sleep(for: .seconds(3))
+                await seed()
+            }
+        }
     }
 
     private func seed() async {

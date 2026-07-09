@@ -8,7 +8,7 @@
 import SwiftUI
 import SwiftData
 
-struct CameraView: View {
+struct RealTimeCameraView: View {
     @Environment(\.openURL)
     private var openURL
 
@@ -175,7 +175,7 @@ struct CameraView: View {
 
 #Preview {
     NavigationStack {
-        CameraView(
+        RealTimeCameraView(
             vm: PreviewContainer.shared.makeCameraVM()
         )
     }

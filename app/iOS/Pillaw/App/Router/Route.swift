@@ -9,4 +9,5 @@ import Foundation
 nonisolated enum Route: Hashable {
     case camera
     case pillInfo(id: String)
+    case favorite
 }

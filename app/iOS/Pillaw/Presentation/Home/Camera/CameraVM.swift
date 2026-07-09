@@ -60,6 +60,10 @@ final class CameraVM {
     /// 감지가 끊겨도 이 시간 동안은 목록에 유지해 깜빡임을 줄인다.
     private let retentionInterval: TimeInterval = 1
 
+    /// 목록에 표시할 최소 신뢰도. 이보다 낮은 감지는 목록에 올리지 않는다.
+    /// (bbox 오버레이는 튜닝을 위해 모델 임계값(0.25) 이상을 전부 보여준다)
+    private let minimumListConfidence: Float = 0.75
+
     var session: AVCaptureSession {
         cameraRepo.session
     }
@@ -91,7 +95,7 @@ final class CameraVM {
         for await frame in cameraRepo.detections() {
             let now = Date.now.timeIntervalSinceReferenceDate
 
-            for detection in frame.detections {
+            for detection in frame.detections where detection.confidence >= minimumListConfidence {
                 guard let id = detection.categoryId else { continue }
                 if lastSeenAt[id] == nil {
                     visibleCategoryIds.append(id)

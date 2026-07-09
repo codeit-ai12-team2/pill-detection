@@ -15,9 +15,13 @@ struct HomeRouterView: View {
         @Bindable var router = router
         
         NavigationStack(path: $router.path) {
-            HomeView(vm: AppContainer.shared.makeHomeVM())
-                .navigationDestination(for: Route.self) {
-                    RouterDestination.view(for: $0)
+                ZStack {
+                    Color.bridalHealth
+                        .ignoresSafeArea()
+                    HomeView(vm: AppContainer.shared.makeHomeVM())
+                        .navigationDestination(for: Route.self) {
+                            RouterDestination.view(for: $0)
+                        }
                 }
         }
     }
