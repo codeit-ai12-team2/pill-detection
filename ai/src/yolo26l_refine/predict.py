@@ -1,13 +1,6 @@
-# ============================================================
-# 파일 역할: predict.py
-# 모든 학습/보강이 끝난 뒤 마지막에 한 번 실행하는 파일.
-# 가장 최근 학습된 best.pt로 test 이미지 전체를 예측해서
-# Kaggle에 제출할 submission.csv를 만듦.
-# 실행: python predict.py
-# ============================================================
 """학습된 모델로 test 이미지 전체를 예측해 Kaggle 제출용 submission.csv를 생성합니다.
 
-config/interface.yaml의 imgsz/conf/iou를 사용합니다 (evaluate.py grid-search --save-interface로 갱신 가능).
+config/interface.yaml의 imgsz/conf/iou를 사용합니다.
 
 사용 예:
     python predict.py
@@ -18,13 +11,20 @@ import argparse
 import json
 
 import pandas as pd
+from common import (
+    CLASS_MAPPING_FILE,
+    DATA_DIR,
+    OUTPUT_DIR,
+    YOLO_DIR,
+    find_latest_weights,
+    get_device,
+    load_config,
+)
 from tqdm import tqdm
 from ultralytics import YOLO
 
-from common import CLASS_MAPPING_FILE, DATA_DIR, OUTPUT_DIR, YOLO_DIR, find_latest_weights, get_device, load_config
 
-
-def main(output_path: str = "submission.csv") -> None:
+def main(output_path: str = "submission.csv"):
     """test 이미지 전체를 예측하고 outputs/yolo/{output_path}에 submission.csv를 저장합니다."""
     device = get_device()
     config = load_config(YOLO_DIR / "config" / "interface.yaml")
@@ -56,16 +56,18 @@ def main(output_path: str = "submission.csv") -> None:
             cls = int(box.cls.item())
             score = float(box.conf.item())
             x1, y1, x2, y2 = box.xyxy[0].tolist()
-            rows.append({
-                "annotation_id": annotation_id,
-                "image_id": image_id,
-                "category_id": reversed_map[cls],
-                "bbox_x": round(x1),
-                "bbox_y": round(y1),
-                "bbox_w": round(x2 - x1),
-                "bbox_h": round(y2 - y1),
-                "score": score,
-            })
+            rows.append(
+                {
+                    "annotation_id": annotation_id,
+                    "image_id": image_id,
+                    "category_id": reversed_map[cls],
+                    "bbox_x": round(x1),
+                    "bbox_y": round(y1),
+                    "bbox_w": round(x2 - x1),
+                    "bbox_h": round(y2 - y1),
+                    "score": score,
+                }
+            )
             annotation_id += 1
 
     df = pd.DataFrame(rows)

@@ -1,10 +1,3 @@
-# ============================================================
-# 파일 역할: common.py
-# yolo 트랙의 모든 스크립트(data_split, train, evaluate, hard_negative,
-# predict)가 공통으로 가져다 쓰는 "경로 상수 + 유틸 함수" 모음.
-# 데이터/출력 경로, config 읽기, GPU/CPU 자동 선택, 최신 학습 결과 찾기를
-# 여기 한 곳에서만 관리해서 다른 파일에서는 중복 코드 없이 import만 하면 됨.
-# ============================================================
 """yolo 트랙 공통 경로 상수와 설정/디바이스 관련 유틸리티.
 
 모든 스크립트(data_split.py, train.py, evaluate.py, hard_negative.py, predict.py)가
@@ -65,9 +58,13 @@ def find_latest_run(model_name: str) -> Path:
     Args:
         model_name: 예) "yolo26l", "yolo26l_hardneg"
     """
-    candidates = [d for d in RUNS_DIR.glob(f"{model_name}*") if (d / "weights/best.pt").exists()]
+    candidates = [
+        d for d in RUNS_DIR.glob(f"{model_name}*") if (d / "weights/best.pt").exists()
+    ]
     if not candidates:
-        raise FileNotFoundError(f"{model_name} 학습 결과를 찾을 수 없습니다. 먼저 학습을 실행하세요.")
+        raise FileNotFoundError(
+            f"{model_name} 학습 결과를 찾을 수 없습니다. 먼저 학습을 실행하세요."
+        )
     return max(candidates, key=lambda d: d.stat().st_mtime)
 
 

@@ -1,11 +1,4 @@
-# ============================================================
-# 파일 역할: train.py
-# YOLO26l 실제 학습을 실행하는 파일.
-# config/train.yaml(공통 하이퍼파라미터) + config/yolo26l.yaml(모델 지정)을
-# 합쳐서 학습을 돌림. augmentation(albumentations)도 여기서 정의.
-# 실행: python train.py
-# ============================================================
-"""YOLO26l 학습 스크립트.
+"""YOLO26l 학습.
 
 사용 예:
     python train.py
@@ -16,12 +9,11 @@ import argparse
 
 import albumentations as A
 import cv2
+from common import DATASET_YAML, OUTPUT_DIR, YOLO_DIR, get_device, load_config
 from ultralytics import YOLO
 
-from common import DATASET_YAML, OUTPUT_DIR, YOLO_DIR, get_device, load_config
 
-
-def build_augmentations() -> list:
+def build_augmentations():
     """알약 데이터셋에 맞춘 albumentations 증강 세트를 만듭니다.
 
     회전은 180 -> 90도로 완화(과도한 회전이 bbox를 헐겁게 만드는 부작용 방지),
@@ -43,7 +35,7 @@ def build_augmentations() -> list:
     ]
 
 
-def main(model_name: str = "yolo26l") -> None:
+def main(model_name: str = "yolo26l"):
     """train.yaml + {model_name}.yaml 설정을 합쳐 학습을 실행합니다.
 
     Args:
@@ -71,6 +63,8 @@ def main(model_name: str = "yolo26l") -> None:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="YOLO26l 학습")
-    parser.add_argument("--model-name", default="yolo26l", help="config/{model_name}.yaml을 사용합니다.")
+    parser.add_argument(
+        "--model-name", default="yolo26l", help="config/{model_name}.yaml을 사용합니다."
+    )
     args = parser.parse_args()
     main(model_name=args.model_name)

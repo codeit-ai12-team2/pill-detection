@@ -1,12 +1,3 @@
-# ============================================================
-# 파일 역할: hard_negative.py
-# evaluate.py confusion에서 찾은 "계속 헷갈리는 클래스 쌍"만 따로 모아서
-# 추가로 짧게 fine-tuning하는 파일. train.py를 다시 통째로 돌리는 게 아니라
-# 기존 best.pt에서 "이어서" 낮은 lr로 조금만 더 학습하는 방식.
-#   - build     : 헷갈리는 클래스가 포함된 train 이미지만 추출
-#   - finetune  : 추출한 데이터로 추가 학습
-# val은 절대 건드리지 않음 (평가 신뢰성 유지 목적).
-# ============================================================
 """가장 헷갈리는 클래스 쌍에 대한 Hard Negative Mining 및 추가 Fine-tuning.
 
 val은 절대 건드리지 않습니다 (섞이면 confusion matrix 평가가 "이미 본 데이터"를
@@ -25,8 +16,6 @@ from pathlib import Path
 import albumentations as A
 import cv2
 import yaml
-from ultralytics import YOLO
-
 from common import (
     DATASET_YAML,
     IMAGES_DIR,
@@ -37,11 +26,12 @@ from common import (
     load_class_names,
     load_config,
 )
+from ultralytics import YOLO
 
 HARDNEG_DIR = OUTPUT_DIR / "hardneg"
 
 
-def extract_hard_negative_samples(target_class_names: list) -> Path:
+def extract_hard_negative_samples(target_class_names: list):
     """지정한 클래스가 포함된 train 이미지만 모읍니다 (val은 절대 섞지 않음).
 
     Args:
@@ -75,7 +65,7 @@ def extract_hard_negative_samples(target_class_names: list) -> Path:
     return hardneg_images_train
 
 
-def build_hardneg_yaml(hardneg_images_train: Path) -> Path:
+def build_hardneg_yaml(hardneg_images_train: Path):
     """hard negative 전용 dataset.yaml을 생성합니다. val은 원본 val 디렉터리를 그대로 참조합니다."""
     original_config = load_config(DATASET_YAML)
 
@@ -95,7 +85,7 @@ def build_hardneg_yaml(hardneg_images_train: Path) -> Path:
     return yaml_path
 
 
-def finetune(base_model_name: str = "yolo26l", epochs: int = 15, lr0: float = 0.0001) -> None:
+def finetune(base_model_name: str = "yolo26l", epochs: int = 15, lr0: float = 0.0001):
     """base_model_name의 최신 가중치에서 이어서, hard negative 데이터로 낮은 lr로 fine-tuning합니다.
 
     메인 학습에서 썼던 scale=0.0 / box=10.0 / dfl=2.0 / CLAHE 강화 설정을 그대로 유지해
@@ -138,10 +128,19 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Hard Negative Mining + Fine-tuning")
     sub = parser.add_subparsers(dest="command", required=True)
 
-    build_parser = sub.add_parser("build", help="헷갈리는 클래스만 모아 hardneg 데이터셋을 만듭니다.")
-    build_parser.add_argument("--classes", nargs="+", required=True, help='예: --classes "리바로정 4mg" "가바토파정 100mg"')
+    build_parser = sub.add_parser(
+        "build", help="헷갈리는 클래스만 모아 hardneg 데이터셋을 만듭니다."
+    )
+    build_parser.add_argument(
+        "--classes",
+        nargs="+",
+        required=True,
+        help='예: --classes "리바로정 4mg" "가바토파정 100mg"',
+    )
 
-    finetune_parser = sub.add_parser("finetune", help="hardneg 데이터로 추가 fine-tuning을 실행합니다.")
+    finetune_parser = sub.add_parser(
+        "finetune", help="hardneg 데이터로 추가 fine-tuning을 실행합니다."
+    )
     finetune_parser.add_argument("--base-model-name", default="yolo26l")
     finetune_parser.add_argument("--epochs", type=int, default=15)
     finetune_parser.add_argument("--lr0", type=float, default=0.0001)
