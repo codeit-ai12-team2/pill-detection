@@ -45,7 +45,9 @@ def main():
         print(f"       {YOLO_DIR} 에 {{name, model}} 키를 가진 yaml 파일을 추가하세요.")
         sys.exit(1)
 
-    action_idx = choose(["학습 (train)", "예측 (predict)", "성능 확인 (result)"], "동작 선택")
+    action_idx = choose(
+        ["학습 (train)", "예측 (predict)", "성능 확인 (result)", "CoreML 변환 (convert)"], "동작 선택"
+    )
 
     print()
 
@@ -71,10 +73,14 @@ def main():
         from train import main as train_main
         print(f"[{selected['name']} 학습 시작]")
         train_main(model_name=selected["stem"])
-    else:
+    elif action_idx == 1:
         from test import main as test_main
         print(f"[{selected['name']} 예측 시작]")
         test_main(model_name=selected["stem"])
+    else:
+        from model_converter import main as convert_main
+        print(f"[{selected['name']} CoreML 변환 시작]")
+        convert_main(model_name=selected["stem"])
 
 
 if __name__ == "__main__":
