@@ -1,17 +1,17 @@
-"""data/collect_single 에 내려받은 원본 라벨링 데이터를 풀어서 class_table.csv 의
+"""data/collect_single 에 내려받은 원본 라벨링 데이터를 풀어서 class_mapping.csv 의
 category_id 에 해당하는 항목만 걸러낸 뒤 data/collect_single/processed 로 정리합니다.
 
 collect_single 폴더에는 AI Hub "약품식별" 데이터셋의 라벨링데이터(``download_TL_*.tar``)만
 내려받아져 있고, 이미지 원본(원천데이터, ``TS_*``)은 아직 없습니다. tar 안의 zip
 (``*.zip.part<offset>``)을 풀면 ``K-<6자리코드>_json/`` 폴더가 나오는데, 이 코드에서 앞의
-0 을 제거한 정수가 class_table.csv 의 category_id 와 대응합니다.
+0 을 제거한 정수가 class_mapping.csv 의 category_id 와 대응합니다.
 
 처리 결과로 다음을 만듭니다.
     - processed/labels: 유효 category_id 라벨만 정규화(annotation 의 category_id/name 을
       실제 약물 정보로 교정)해서 모아둔 폴더.
     - processed/class_file_counts.md: 클래스별 라벨 파일(json) 개수.
     - processed/required_downloads.md: 라벨이 발견된 TL 번호에 대응하는 이미지 원본(TS_*)
-      다운로드 목록과, class_table.csv 에는 있지만 라벨을 전혀 찾지 못한 category_id 목록.
+      다운로드 목록과, class_mapping.csv 에는 있지만 라벨을 전혀 찾지 못한 category_id 목록.
 
 tar 81개(총 수 GB)를 순서대로 풀다 보면 실행 환경의 시간 제한 등으로 중간에 중단될 수 있어,
 tar 하나를 처리할 때마다 processed/_state.json 에 진행 상황을 체크포인트로 남깁니다. 스크립트를
@@ -35,7 +35,7 @@ from pathlib import Path
 from tqdm import tqdm
 
 COLLECT_SINGLE_ROOT = Path("../../data/collect_single")
-CLASS_TABLE_PATH = COLLECT_SINGLE_ROOT / "class_table.csv"
+CLASS_MAPPING_PATH = COLLECT_SINGLE_ROOT / "class_mapping.csv"
 
 WORK_DIR = Path(tempfile.gettempdir()) / "collect_single_extract"
 
@@ -52,10 +52,10 @@ TL_TAR_PATTERN = re.compile(r"^download_TL_(?P<index>\d+)\.tar$")
 
 
 def load_class_table(csv_path: Path) -> dict[int, dict]:
-    """class_table.csv 를 읽어 category_id -> {class_index, class_name} 매핑을 만듭니다.
+    """class_mapping.csv 를 읽어 category_id -> {class_index, class_name} 매핑을 만듭니다.
 
     Args:
-        csv_path: class_table.csv 파일 경로.
+        csv_path: class_mapping.csv 파일 경로.
 
     Returns:
         category_id 를 key 로 갖고, class_index/class_name 을 담은 dict 를 value 로 갖는 딕셔너리.
@@ -65,7 +65,7 @@ def load_class_table(csv_path: Path) -> dict[int, dict]:
         for row in csv.DictReader(f):
             class_table[int(row["category_id"])] = {
                 "class_index": int(row["class_index"]),
-                "class_name": row["class_name"],
+                "class_name": row["dl_name"],
             }
     return class_table
 
@@ -244,7 +244,7 @@ def write_class_count_md(
     lines = [
         "# collect_single 클래스별 라벨 파일 개수",
         "",
-        f"- class_table.csv 기준 전체 클래스 수: {len(class_table)}",
+        f"- class_mapping.csv 기준 전체 클래스 수: {len(class_table)}",
         f"- 라벨이 존재하는 클래스 수: {found_classes}",
         f"- 전체 라벨 파일 수: {sum(total_file_counts.values())}",
         "",
@@ -323,7 +323,7 @@ def write_required_downloads_md(
 
     lines += [
         "",
-        "## class_table.csv 에는 있으나 collect_single 라벨에서 전혀 찾지 못한 category_id",
+        "## class_mapping.csv 에는 있으나 collect_single 라벨에서 전혀 찾지 못한 category_id",
         "",
     ]
     if missing_category_ids:
@@ -342,8 +342,10 @@ def write_required_downloads_md(
     ]
     if gap_tar_indices:
         lines.append(", ".join(f"TL_{idx}" for idx in gap_tar_indices))
-    else:
+    elif all_tar_indices:
         lines.append(f"- 없음 (download_TL_{min(all_tar_indices):02d}.tar ~ download_TL_{max(all_tar_indices):02d}.tar 사이에 결번 없음)")
+    else:
+        lines.append("- download_TL_*.tar 파일을 하나도 찾지 못했습니다.")
 
     if incomplete:
         lines += [
@@ -356,7 +358,7 @@ def write_required_downloads_md(
 
 
 def main() -> None:
-    class_table = load_class_table(CLASS_TABLE_PATH)
+    class_table = load_class_table(CLASS_MAPPING_PATH)
 
     PROCESSED_LABELS_DIR.mkdir(parents=True, exist_ok=True)
 
