@@ -92,6 +92,9 @@ struct PillInfoView: View {
                                 .resizable()
                                 .frame(width: 17.5, height: 15.62)
                             Text(warning)
+                                .font(.griunMongtori(size: 15))
+                                .foregroundStyle(.webOrange)
+                            Spacer()
                         }
                         .padding(28)
                         .background {
