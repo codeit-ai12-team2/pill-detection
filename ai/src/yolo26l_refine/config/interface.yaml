@@ -1,0 +1,6 @@
+# 파일 역할: interface.yaml
+# predict.py(제출 파일 생성)가 읽는 추론 설정.
+# evaluate.py grid-search --save-interface를 실행하면 conf/iou가 자동 갱신됨.
+imgsz: 640
+conf: 0.25
+iou: 0.5

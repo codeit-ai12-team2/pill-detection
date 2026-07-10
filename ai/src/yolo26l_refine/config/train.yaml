@@ -1,0 +1,33 @@
+# 파일 역할: train.yaml
+# train.py가 읽는 공통 학습 하이퍼파라미터. 모델 종류(yolo26l.yaml)와
+# 합쳐져서 최종 학습 설정이 됨. 실험할 땐 이 파일 값만 바꾸면 됨(코드 수정 X).
+epochs: 150
+batch: 16
+imgsz: 640
+
+optimizer: AdamW
+lr0: 0.001
+cos_lr: true
+
+mosaic: 0.5
+mixup: 0.0
+copy_paste: 0.0
+
+patience: 30
+seed: 42
+
+box: 10.0   # mAP50-95(박스 위치 정밀도) 개선을 위해 기본 7.5보다 올림
+dfl: 2.0    # 박스 경계 회귀 정밀도 강화, 기본 1.5보다 올림
+scale: 0.0  # 크기(scale) augmentation 끔 - 비슷한 흰색 타원형 알약을 크기 차이로 구분해야 하는데, 이게 섞이면 오히려 방해됨
+
+# ===== 하단에 정의! (실험용 추가 파라미터, 하나씩 주석 해제하며 비교) =====
+# degrees: 90
+# hsv_h: 0.015
+# hsv_s: 0.4
+# hsv_v: 0.3
+# translate: 0.1
+# scale: 0.1
+# shear: 0.0
+# perspective: 0.0
+# flipud: 0.0
+# fliplr: 0.5
