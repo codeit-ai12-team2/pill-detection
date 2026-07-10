@@ -39,7 +39,7 @@ def convert_to_coreml(weights_path: Path, imgsz: int) -> Path:
         생성된 .mlpackage 경로.
     """
     model = YOLO(weights_path)
-    exported_path = model.export(format="coreml", imgsz=imgsz)
+    exported_path = model.export(format="coreml", imgsz=imgsz, nms=True)
     return Path(exported_path)
 
 

@@ -9,6 +9,8 @@ from pathlib import Path
 
 import yaml
 
+sys.stdin.reconfigure(encoding="utf-8", errors="replace")
+
 YOLO_DIR = Path(__file__).parent / "yolo"
 sys.path.insert(0, str(YOLO_DIR))
 
