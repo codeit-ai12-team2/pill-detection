@@ -11,7 +11,7 @@ Codeit 초급 프로젝트로 진행한 알약 탐지 앱입니다.
 | UI | SwiftUI |
 | 로컬 저장소 | SwiftData |
 | ML | CoreML + Vision (Ultralytics YOLO26 export) |
-| 아키텍처 | Presentation / Domain / Data 3-layer + MVVM |
+| 아키텍처 | TCA(Presentation / Domain / Data 3-layer) + MVVM |
 
 ---
 
@@ -46,7 +46,7 @@ https://apis.data.go.kr/1471000/MdcinGrnIdntfcInfoService03/getMdcinGrnIdntfcInf
 ### 1-2. CoreML 모델
 
 - 모델 파일: `Pillaw/App/Resources/yolo26.mlpackage` (Ultralytics YOLO26을 CoreML로 export한 것, 빌드 시 `yolo26.mlmodelc`로 컴파일됨)
-- 저장소에 포함되어 있어 별도 다운로드는 필요 없습니다.
+- 모델을 변환하여 위 경로에 넣어두면 됩니다.
 - 모델 파일이 번들에 없어도 앱은 정상 동작하며 **감지 기능만 비활성화**됩니다 (`PillDetectorRepoImpl` 참고).
 - 모델을 교체할 때는 같은 이름(`yolo26.mlpackage`)으로 리소스를 바꾸거나 `PillDetectorRepoImpl.modelName`을 수정하면 됩니다.
 - 현재 모델은 GPU/ANE 컴파일이 실패하는 이슈가 있어 **CPU 전용**(`computeUnits = .cpuOnly`)으로 실행합니다.
