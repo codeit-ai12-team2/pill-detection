@@ -1,0 +1,2 @@
+model: yolo26s.pt
+name: yolo26s
