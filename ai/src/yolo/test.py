@@ -9,6 +9,11 @@ from tqdm import tqdm
 
 YOLO_DIR = Path(__file__).parent
 
+CLASS_MAPPING_PATHS = {
+    "v1": "../../data/processed/shared/class_mapping.json",
+    "v2": "../../data/processed/shared_v2/class_mapping.json",
+}
+
 
 def load_config(config_path) -> dict:
     with open(config_path, encoding="utf-8") as f:
@@ -39,7 +44,7 @@ def find_best_weights(model_name: str) -> Path | None:
     return (candidates[0] / "weights/best.pt") if candidates else None
 
 
-def main(model_name: str = "yolo11s"):
+def main(model_name: str = "yolo11s", dataset_version: str = "v1"):
     device = get_device()
 
     config = load_config(YOLO_DIR / "interface.yaml")
@@ -58,7 +63,10 @@ def main(model_name: str = "yolo11s"):
     run_name = best_pt.parent.parent.name
 
     test_dir = (YOLO_DIR / config["test_dir"]).resolve()
-    class_mapping_file = (YOLO_DIR / config["class_mapping_file"]).resolve()
+    # 모델이 학습된 dataset_version 의 class_mapping.json 을 써야 class index 가 맞습니다.
+    # v1(56개)/v2(118개) 클래스 수가 달라, 잘못된 매핑을 쓰면 존재하지 않는 index 에서
+    # KeyError 가 납니다.
+    class_mapping_file = (YOLO_DIR / CLASS_MAPPING_PATHS[dataset_version]).resolve()
     output_dir = (YOLO_DIR / f"../../outputs/{run_name}").resolve()
 
     output_file_path = output_dir / "submission.csv"

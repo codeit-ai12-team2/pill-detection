@@ -5,4 +5,3 @@ conf: 0.25
 iou: 0.7
 
 test_dir: ../../data/raw/test_images
-class_mapping_file: ../../data/processed/shared/class_mapping.json

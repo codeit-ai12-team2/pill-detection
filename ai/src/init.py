@@ -26,6 +26,14 @@ def load_model_configs() -> list[dict]:
     return configs
 
 
+def choose_dataset_version() -> str:
+    """데이터셋 버전(v1/v2) 선택 메뉴를 출력하고 선택값을 반환합니다."""
+    dataset_idx = choose(
+        ["v1 (data/processed/shared)", "v2 (data/processed/shared_v2)"], "데이터셋 버전 선택"
+    )
+    return "v1" if dataset_idx == 0 else "v2"
+
+
 def choose(options: list[str], prompt: str) -> int:
     """번호 메뉴를 출력하고 선택된 0-based 인덱스를 반환합니다."""
     print(f"\n[{prompt}]")
@@ -73,16 +81,14 @@ def main():
 
     if action_idx == 0:
         from train import main as train_main
-        dataset_idx = choose(
-            ["v1 (data/processed/shared)", "v2 (data/processed/shared_v2)"], "데이터셋 버전 선택"
-        )
-        dataset_version = "v1" if dataset_idx == 0 else "v2"
+        dataset_version = choose_dataset_version()
         print(f"[{selected['name']} 학습 시작, 데이터셋 {dataset_version}]")
         train_main(model_name=selected["stem"], dataset_version=dataset_version)
     elif action_idx == 1:
         from test import main as test_main
-        print(f"[{selected['name']} 예측 시작]")
-        test_main(model_name=selected["stem"])
+        dataset_version = choose_dataset_version()
+        print(f"[{selected['name']} 예측 시작, 데이터셋 {dataset_version}]")
+        test_main(model_name=selected["stem"], dataset_version=dataset_version)
     else:
         from model_converter import main as convert_main
         print(f"[{selected['name']} CoreML 변환 시작]")
