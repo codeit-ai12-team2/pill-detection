@@ -15,6 +15,8 @@ enum RouterDestination {
         switch route {
         case .camera:
             StaticCameraView(vm: (container ?? .shared).makeCameraVM())
+        case .realTimeCamera:
+            RealTimeCameraView(vm: (container ?? .shared).makeCameraVM())
         case .pillInfo(let id):
             PillInfoView(itemSeq: id, vm: (container ?? .shared).makePillInfoVM())
         case .pillInfoBanned:

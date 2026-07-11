@@ -8,6 +8,7 @@ import Foundation
 
 nonisolated enum Route: Hashable {
     case camera
+    case realTimeCamera
     case pillInfo(id: String)
     case pillInfoBanned
     case favorite
