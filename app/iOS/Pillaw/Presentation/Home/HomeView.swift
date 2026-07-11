@@ -18,6 +18,9 @@ struct HomeView: View {
     @State
     private var vm: HomeVM
     
+    @State
+    private var betaToggleState = false
+    
     init(vm: HomeVM) {
         _vm = State(initialValue: vm)
     }
@@ -73,8 +76,22 @@ struct HomeView: View {
                             Text("알약을 촬영해서 정보를 확인해요")
                                 .font(.griunMongtori(size: 15))
                                 .foregroundStyle(.makara)
+                                .multilineTextAlignment(.leading)
                         }
                     }
+                    if (betaToggleState) {
+                        Button(action: {
+                            router.push(.realTimeCamera)
+                        }) {
+                            MenuCardView(icon: .icCamera, iconTint: .steelBlue, iconBGTint: .hawkesBlue, title: "카메라로 인식") {
+                                Text("실시간으로 알약을 감지해서 정보를 확인해요")
+                                    .font(.griunMongtori(size: 15))
+                                    .foregroundStyle(.makara)
+                                    .multilineTextAlignment(.leading)
+                            }
+                        }
+                    }
+                    
                     Button(action: {
                         router.push(.favorite)
                     }) {
@@ -82,11 +99,18 @@ struct HomeView: View {
                             Text("자주 찾는 알약을 바로 확인해요")
                                 .font(.griunMongtori(size: 15))
                                 .foregroundStyle(.makara)
+                                .multilineTextAlignment(.leading)
                         }
                     }
                 }
             }
             Spacer()
+            HStack {
+                Toggle("beta 모드", isOn: $betaToggleState)
+                    .font(.griunMongtori(size: 12))
+                Spacer()
+            }
+            .padding()
         }
         .padding(.horizontal, 20)
     }
