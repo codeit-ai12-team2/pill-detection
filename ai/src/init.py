@@ -48,7 +48,7 @@ def main():
         sys.exit(1)
 
     action_idx = choose(
-        ["학습 (train)", "예측 (predict)", "성능 확인 (result)", "CoreML 변환 (convert)"], "동작 선택"
+        ["학습 (train)", "예측 (predict)", "성능 확인 (result)", "CoreML 변환 (convert, macOS 혹은 Linux에서만 동작)"], "동작 선택"
     )
 
     print()
@@ -73,8 +73,12 @@ def main():
 
     if action_idx == 0:
         from train import main as train_main
-        print(f"[{selected['name']} 학습 시작]")
-        train_main(model_name=selected["stem"])
+        dataset_idx = choose(
+            ["v1 (data/processed/shared)", "v2 (data/processed/shared_v2)"], "데이터셋 버전 선택"
+        )
+        dataset_version = "v1" if dataset_idx == 0 else "v2"
+        print(f"[{selected['name']} 학습 시작, 데이터셋 {dataset_version}]")
+        train_main(model_name=selected["stem"], dataset_version=dataset_version)
     elif action_idx == 1:
         from test import main as test_main
         print(f"[{selected['name']} 예측 시작]")

@@ -52,9 +52,14 @@ def main(model_name: str = "yolo11s"):
 
     print(f"사용할 가중치: {best_pt}")
 
+    # best_pt 는 <run_dir>/weights/best.pt 이므로, run_dir 이름이 실제 실행한 모델 폴더명입니다.
+    # 같은 model_name 으로 여러 번 학습하면 yolo11s, yolo11s2 ... 처럼 폴더가 늘어나므로,
+    # model_name 대신 이 이름을 써야 실제 사용한 가중치가 어느 실행인지 결과와 매칭됩니다.
+    run_name = best_pt.parent.parent.name
+
     test_dir = (YOLO_DIR / config["test_dir"]).resolve()
     class_mapping_file = (YOLO_DIR / config["class_mapping_file"]).resolve()
-    output_dir = (YOLO_DIR / f"../../outputs/{model_name}").resolve()
+    output_dir = (YOLO_DIR / f"../../outputs/{run_name}").resolve()
 
     output_file_path = output_dir / "submission.csv"
     output_file_path.parent.mkdir(parents=True, exist_ok=True)

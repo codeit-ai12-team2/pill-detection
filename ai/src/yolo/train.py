@@ -8,6 +8,11 @@ import albumentations as A
 
 YOLO_DIR = Path(__file__).parent
 
+DATASET_PATHS = {
+    "v1": "../../data/processed/shared/dataset.yaml",
+    "v2": "../../data/processed/shared_v2/dataset.yaml",
+}
+
 
 def load_config(config_path) -> dict:
     with open(config_path, encoding="utf-8") as f:
@@ -25,17 +30,17 @@ def get_device() -> int | str:
     return "cpu"
 
 
-def main(model_name: str = "yolo11s"):
+def main(model_name: str = "yolo11s", dataset_version: str = "v1"):
     device = get_device()
 
     train_config = load_config(YOLO_DIR / "train.yaml")
     model_config = load_config(YOLO_DIR / f"{model_name}.yaml")
 
     config = {**train_config, **model_config}
-    config.pop("augmentations", None) 
+    config.pop("augmentations", None)
 
     model_pt = YOLO_DIR / config.pop("model")
-    config["data"] = str((YOLO_DIR / config["data"]).resolve())
+    config["data"] = str((YOLO_DIR / DATASET_PATHS[dataset_version]).resolve())
 
     custom_transforms = [
        # A.Rotate(limit=180, border_mode=cv2.BORDER_CONSTANT, crop_border=False, p=0.8),
