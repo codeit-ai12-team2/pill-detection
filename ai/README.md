@@ -126,7 +126,7 @@ Kaggle 알약 탐지 데이터셋 + AI-Hub 데이터(TL/TS 조합 1, 3, 4, 5, 6,
 
 | 순서 | 명령어 | 설명 | 실행 방식 |
 | :--: | --- | --- | :--: |
-| 1 | `python shared_dataset_composer.py` | raw → processed 변환. 콤보(K-코드) 단위로 Train/Val을 누수 없이 분리하고, 희귀 클래스 Oversampling까지 자동 실행 | 직접 실행 (`src/util`에서) |
+| 1 | `python shared_dataset_composer.py` | raw → processed 변환. 데이터(K-코드) 단위로 Train/Val을 누수 없이 분리하고, 데이터 수가 적은 클래스 Oversampling까지 자동 실행 | 직접 실행 (`src/util`에서) |
 | 2 | `python train.py` | YOLO26l 학습. `init.py`로 실행 시 학습 직후 Hard Negative Mining(헷갈리는 클래스 fine-tuning)을 이어서 할지 선택 가능 | `init.py` 또는 직접 실행 |
 | 3 | `python result.py yolo26l confusion` | Confusion Matrix로 오탐 클래스 쌍 확인 | `init.py`(성능 확인 메뉴) 또는 직접 실행 |
 | 4 | `python result.py yolo26l grid-search --save-interface` | Confidence/IoU 최적 조합 탐색 후 `interface.yaml` 반영 | `init.py`(성능 확인 메뉴) 또는 직접 실행 |
@@ -169,8 +169,8 @@ perspective: 0
 
 | 기법 | 설명 |
 | --- | --- |
-| **Train/Val 재분리** | 같은 K-코드(알약 조합)가 train/val 양쪽에 겹쳐 들어가는 데이터 누수를 발견하고, 희귀 클래스부터 우선 배정하는 방식으로 56개 클래스 전부가 train에 최소 1개 이상 포함되도록 재분리 |
-| **Oversampling** | Train 기준 일정 개수 미만인 희귀 클래스를 복제하여 최소 확보 수량을 채움 |
+| **Train/Val 데이터 기반 분리** | 같은 K-코드(알약 조합)가 train/val 양쪽에 겹치지 않도록 `shared_dataset_composer.py`가 처음부터 데이터 단위로 분리. 데이터 수가 적은 클래스부터 우선 배정해 56개 클래스 전부가 train에 최소 1개 이상 포함되도록 함 |
+| **Oversampling** | Train 기준 데이터가 일정 개수 미만인 클래스를 복제하여 최소 확보 수량을 채움 |
 | **Hard Negative Mining** | Confusion Matrix에서 가장 헷갈리는 클래스 쌍을 파악한 뒤, 해당 클래스가 포함된 train 이미지만 추출해 낮은 lr로 추가 Fine-tuning (val은 절대 섞지 않아 evaluation leakage 방지) |
 | **Threshold Grid Search** | conf(0.05-0.3) · iou(0.4-0.7) 조합을 그리드서치하여 mAP50-95 기준 최적 threshold를 탐색하고 `interface.yaml`에 반영 |
 
