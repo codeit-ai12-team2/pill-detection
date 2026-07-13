@@ -82,7 +82,8 @@ Repo URL : [![Repo](https://img.shields.io/badge/GitHub-Repository-181717?style=
 | 문서 | 링크 |
 | :--: | :--: |
 | 📎 AI 통합 README | [바로가기](ai/README.md) |
-| 📎 app/iOS README | [바로가기](app/iOS/README.md) |
+| 📎 Util README | [바로가기](ai/src/util/README.md) |
+| 📎 App/iOS README | [바로가기](app/iOS/README.md) |
 
 <br/>
 
@@ -111,7 +112,6 @@ Repo URL : [![Repo](https://img.shields.io/badge/GitHub-Repository-181717?style=
 ┃ ┃ ┃ ┣ 🔧 yolo26_train.yaml
 ┃ ┃ ┃ ┣ 🔧 yolo26l.yaml
 ┃ ┃ ┃ ┗ 🔧 yolo26s.yaml
-┃ ┃ ┣ 📝 dataset.py
 ┃ ┃ ┗ 📝 init.py
 ┃ ┣ 📃 README.md
 ┃ ┣ 📃 requirements.txt
