@@ -241,16 +241,15 @@ flowchart TD
 ### 1-2. 마스코트 — `Pill Goon(필군)`
 
 - 캡슐 알약 형태의 베개를 캐릭터화
-- 발음상 **"Feel Good(필굿)"**을 연상시키도록 한 이름
+- 발음상 **Feel Good(필굿)**을 연상시키도록 한 이름
 - 로딩 화면, 알약 상세 설명 화면, 오류 화면 등에서 사용
 
-| 필드 | 값 |
+| 이름 | Pill Goon(필군) |
 |:-----|:-----|
-| 이름 | 필군 |
 | 성별 | 알 수 없음 |
 | MBTI | ESFJ |
 
-![Pill Goon 마스코트](../assets/pillaw_app_icon.png)
+<img src="../assets/pillaw_mascot.png" width="300"/>
 
 ---
 
