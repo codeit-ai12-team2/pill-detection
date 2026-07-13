@@ -138,7 +138,7 @@ Kaggle 알약 탐지 데이터셋 + AI-Hub 데이터(TL/TS 조합 1, 3, 4, 5, 6,
 ### 5-2. 하이퍼파라미터
 
 ```yaml
-epochs: 100
+epochs: 150
 batch: 16
 seed: 42
 optimizer: auto
@@ -147,7 +147,7 @@ cos_lr: false
 
 ### 5-3. 증강
 
-기본 YOLO 증강(mosaic, mixup, hsv, degrees 등)은 대부분 0으로 꺼두고, `Albumentations`로 알약 특성에 맞춘 증강을 별도 구성했습니다.
+YOLO 기본 증강(모자이크, 믹스업, hsv, 회전 등)은 대부분 0으로 꺼두고, `Albumentations`로 알약 특성에 맞춘 증강을 별도로 구성했습니다.
 
 ```yaml
 imgsz: 640
