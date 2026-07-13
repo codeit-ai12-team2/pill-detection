@@ -121,3 +121,6 @@ Temporary Items
 ## CoreML model (학습 산출물 — 별도로 전달받아 App/Resources에 넣기)
 *.mlpackage
 *.mlmodel
+
+## README 이미지 폴더
+app/iOS/assets
