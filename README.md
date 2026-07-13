@@ -81,7 +81,7 @@ Repo URL : [![Repo](https://img.shields.io/badge/GitHub-Repository-181717?style=
 
 | 문서 | 링크 |
 | :--: | :--: |
-| 📎 EDA README | [바로가기](ai/README.md) |
+| 📎 AI 통합 README | [바로가기](ai/README.md) |
 | 📎 app/iOS README | [바로가기](app/iOS/README.md) |
 
 <br/>
@@ -90,26 +90,32 @@ Repo URL : [![Repo](https://img.shields.io/badge/GitHub-Repository-181717?style=
 
 ```
 📦 pill-detection
-┣ 📂 .images
 ┣ 📂 ai
 ┃ ┣ 📂 outputs
-┃ ┃ ┣ 📂 yolo11s
-┃ ┃ ┣ 📂 yolo26l-17
-┃ ┃ ┣ 📂 yolo26l-21
-┃ ┃ ┣ 📂 yolo26l
-┃ ┃ ┗ 📂 yolo26s
 ┃ ┣ 📂 src
 ┃ ┃ ┣ 📂 rt_detr
 ┃ ┃ ┣ 📂 util
 ┃ ┃ ┣ 📂 visual
 ┃ ┃ ┣ 📂 yolo
-┃ ┃ ┣ 📂 yolo26l_refine
+┃ ┃ ┃ ┣ 📝 data_split.py
+┃ ┃ ┃ ┣ 📝 evaluate.py
+┃ ┃ ┃ ┣ 📝 hard_negative.py
+┃ ┃ ┃ ┣ 🔧 interface.yaml
+┃ ┃ ┃ ┣ 📝 model_converter.py
+┃ ┃ ┃ ┣ 📝 result.py
+┃ ┃ ┃ ┣ 📝 test.py
+┃ ┃ ┃ ┣ 📝 train.py
+┃ ┃ ┃ ┣ 🔧 train.yaml
+┃ ┃ ┃ ┣ 🔧 yolo11m.yaml
+┃ ┃ ┃ ┣ 🔧 yolo11s.yaml
+┃ ┃ ┃ ┣ 🔧 yolo26_train.yaml
+┃ ┃ ┃ ┣ 🔧 yolo26l.yaml
+┃ ┃ ┃ ┗ 🔧 yolo26s.yaml
 ┃ ┃ ┣ 📝 dataset.py
 ┃ ┃ ┗ 📝 init.py
 ┃ ┣ 📃 README.md
 ┃ ┣ 📃 requirements.txt
-┃ ┣ 📃 requirements_for_runpod.txt
-┃ ┗ 📃 requirements_for_runpod 2.txt
+┃ ┗ 📃 requirements_for_runpod.txt
 ┣ 📂 app/iOS
 ┃ ┣ 📂 Pillaw.xcodeproj
 ┃ ┣ 📂 Pillaw
