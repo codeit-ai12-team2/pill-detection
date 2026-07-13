@@ -17,7 +17,11 @@ def find_best_weights(model_name: str) -> Path | None:
     if not runs_dir.exists():
         return None
     candidates = sorted(
-        [d for d in runs_dir.glob(f"{model_name}*") if (d / "weights/best.pt").exists()],
+        [
+            d
+            for d in runs_dir.glob(f"{model_name}*")
+            if (d / "weights/best.pt").exists()
+        ],
         key=lambda d: d.stat().st_mtime,
         reverse=True,
     )
@@ -28,7 +32,7 @@ def convert_to_coreml(weights_path: Path, imgsz: int) -> Path:
     """weights_path 의 pt 모델을 CoreML로 변환합니다.
 
     ultralytics 의 export() 는 결과물을 원본 가중치와 같은 폴더에 저장하므로
-    (예: runs/detect/yolo11s/weights/best.pt -> best.mlpackage), 별도로
+    (예: runs/detect/yolo26l/weights/best.pt -> best.mlpackage), 별도로
     저장 경로를 옮기지 않습니다.
 
     Args:
@@ -43,7 +47,7 @@ def convert_to_coreml(weights_path: Path, imgsz: int) -> Path:
     return Path(exported_path)
 
 
-def main(model_name: str = "yolo11s"):
+def main(model_name: str = "yolo26l"):
     config = load_config(YOLO_DIR / "interface.yaml")
 
     best_pt = find_best_weights(model_name)
