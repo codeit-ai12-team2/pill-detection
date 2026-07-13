@@ -250,7 +250,7 @@ flowchart TD
 | 성별 | 알 수 없음 |
 | MBTI | ESFJ |
 
-![Pill Goon 마스코트](./assets/pillgoon_app_icon.png)
+![Pill Goon 마스코트](../assets/pillgoon_app_icon.png)
 
 ---
 
@@ -277,9 +277,9 @@ flowchart TD
 | 브랜드 (한글) | 그리운 몽토리 | 둥글고 부드러운 형태와 어미 없는 문체로 친근하고 편한 톤 전달 |
 
 
-![Cloud Sofa](./assets/font_cloud_sofa.png)
+![Cloud Sofa](../assets/font_cloud_sofa.png)
 
-![그리운 몽토리](./assets/font_griun_mondori.png)
+![그리운 몽토리](../assets/font_griun_mondori.png)
 
 ---
 
