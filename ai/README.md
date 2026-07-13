@@ -122,23 +122,24 @@ Kaggle 알약 탐지 데이터셋 + AI-Hub 데이터(TL/TS 조합 1, 3, 4, 5, 6,
 
 ### 5-1. 파이프라인 실행 순서
 
-| 순서 | 명령어 | 설명 |
-| :--: | --- | --- |
-| 1 | `python data_split.py check` | Train/Val 데이터 누수 점검 |
-| 2 | `python data_split.py resplit --apply` | 클래스 균형 보장하며 Train/Val 재분리 |
-| 3 | `python data_split.py oversample` | 희귀 클래스 Oversampling |
-| 4 | `python train.py` | YOLO26l 학습 |
-| 5 | `python evaluate.py confusion` | Confusion Matrix로 오탐 클래스 쌍 확인 |
-| 6 | `python hard_negative.py build --classes "..."` | 헷갈리는 클래스만 모아 Hard Negative 데이터셋 구성 |
-| 7 | `python hard_negative.py finetune` | Hard Negative 데이터로 추가 Fine-tuning |
-| 8 | `python evaluate.py grid-search --save-interface` | Confidence/IoU 최적 조합 탐색 후 `interface.yaml` 반영 |
-| 9 | `python test.py` | 최종 `submission.csv` 생성 |
-| - | `python model_converter.py` | iOS 배포용 CoreML(`.mlpackage`) 변환 |
+`shared_dataset_composer.py`는 raw 데이터를 processed로 변환하는 최초 1회성 스크립트라 `init.py` 메뉴에 없고 직접 실행합니다. 나머지는 위 4번 `init.py` 메뉴로도 실행할 수 있습니다.
+
+| 순서 | 명령어 | 설명 | 실행 방식 |
+| :--: | --- | --- | :--: |
+| 1 | `python shared_dataset_composer.py` | raw → processed 변환. 콤보(K-코드) 단위로 Train/Val을 누수 없이 분리하고, 희귀 클래스 Oversampling까지 자동 실행 | 직접 실행 (`src/util`에서) |
+| 2 | `python train.py` | YOLO26l 학습. `init.py`로 실행 시 학습 직후 Hard Negative Mining(헷갈리는 클래스 fine-tuning)을 이어서 할지 선택 가능 | `init.py` 또는 직접 실행 |
+| 3 | `python result.py yolo26l confusion` | Confusion Matrix로 오탐 클래스 쌍 확인 | `init.py`(성능 확인 메뉴) 또는 직접 실행 |
+| 4 | `python result.py yolo26l grid-search --save-interface` | Confidence/IoU 최적 조합 탐색 후 `interface.yaml` 반영 | `init.py`(성능 확인 메뉴) 또는 직접 실행 |
+| 5 | `python result.py yolo26l class-scores --conf X --iou Y` | 클래스별 mAP50-95 확인 | `init.py`(성능 확인 메뉴) 또는 직접 실행 |
+| 6 | `python test.py` | 최종 `submission.csv` 생성 | `init.py` 또는 직접 실행 |
+| - | `python model_converter.py` | iOS 배포용 CoreML(`.mlpackage`) 변환 | `init.py` 또는 직접 실행 |
+
+> Hard Negative Mining은 더 이상 별도 스크립트가 아니라 `train.py` 학습의 마지막 단계로 통합되어 있습니다. `init.py`의 "학습" 메뉴에서 모델·데이터셋 버전 선택 후 "Hard Negative Mining도 이어서 진행할까요?"에서 예를 선택하고 헷갈리는 클래스명을 입력하면 됩니다.
 
 ### 5-2. 하이퍼파라미터
 
 ```yaml
-epochs: 150
+epochs: 100
 batch: 16
 seed: 42
 optimizer: auto
@@ -171,7 +172,7 @@ perspective: 0
 | **Train/Val 재분리** | 같은 K-코드(알약 조합)가 train/val 양쪽에 겹쳐 들어가는 데이터 누수를 발견하고, 희귀 클래스부터 우선 배정하는 방식으로 56개 클래스 전부가 train에 최소 1개 이상 포함되도록 재분리 |
 | **Oversampling** | Train 기준 일정 개수 미만인 희귀 클래스를 복제하여 최소 확보 수량을 채움 |
 | **Hard Negative Mining** | Confusion Matrix에서 가장 헷갈리는 클래스 쌍을 파악한 뒤, 해당 클래스가 포함된 train 이미지만 추출해 낮은 lr로 추가 Fine-tuning (val은 절대 섞지 않아 evaluation leakage 방지) |
-| **Threshold Grid Search** | conf(0.05~0.3) · iou(0.4~0.7) 조합을 그리드서치하여 mAP50-95 기준 최적 threshold를 탐색하고 `interface.yaml`에 반영 |
+| **Threshold Grid Search** | conf(0.05-0.3) · iou(0.4-0.7) 조합을 그리드서치하여 mAP50-95 기준 최적 threshold를 탐색하고 `interface.yaml`에 반영 |
 
 ### 5-5. CoreML 변환 (iOS 연동)
 
