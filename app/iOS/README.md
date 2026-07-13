@@ -235,7 +235,7 @@ flowchart TD
 
 ### 1-1. 서비스명 — `Pillaw`
 
-- Pill + AI + Watch의 합성어이자, 발음상 **"Pillow(베개)"**를 연상시킴
+- Pill + AI + Watch의 합성어이자, 발음상 **Pillow(베개)**를 연상시킴
 - 알약 탐지라는 기술적 기능과, 베개처럼 편안한 사용자 경험을 주고자 하는 브랜드의 의도를 녹여냄
 
 ### 1-2. 마스코트 — `Pill Goon(필군)`
@@ -265,7 +265,7 @@ flowchart TD
 | 서브/포인트 | `#3A342C` `#FFCCCF` `#DCEDC1` `#FFF2C2` `#FFFCF7` |
 
 
-![컬러 팔레트](./assets/pillaw_color_palette.png)
+![컬러 팔레트](../assets/pillaw_color_palette.png)
 
 ---
 
@@ -285,7 +285,7 @@ flowchart TD
 
 ## 4. 화면 흐름
 
-![전체 레이아웃](./assets/pillaw_layout.png)
+![전체 레이아웃](../assets/pillaw_layout.png)
 
 ---
 
