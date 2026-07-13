@@ -18,11 +18,6 @@
 ┃ ┗ 📂 raw_v2             # 정제된 원본 이미지/어노테이션 (v2)
 ┣ 📂 notebooks            # EDA, 환경 점검 등 노트북
 ┣ 📂 outputs              # 모델별 추론 결과(submission.csv)
-┃ ┣ 📂 yolo11s
-┃ ┣ 📂 yolo26l
-┃ ┣ 📂 yolo26l-17
-┃ ┣ 📂 yolo26l-21
-┃ ┗ 📂 yolo26s
 ┣ 📂 src
 ┃ ┣ 📂 rt_detr            # RT-DETR 모델 학습/예측
 ┃ ┣ 📂 util               # 원본 데이터 수집·가공 스크립트
@@ -35,6 +30,8 @@
 ┣ 📃 requirements.txt
 ┗ 📃 requirements_for_runpod.txt
 ```
+
+📁 [데이터 다운로드 링크 (Google Drive)](https://drive.google.com/drive/folders/1W_8iUqnBash06zLwfmGdE7Ry3S40HfRS?usp=sharing)
 
 ## 3. EDA 분석 문서
 
