@@ -249,7 +249,9 @@ flowchart TD
 | 성별 | 알 수 없음 |
 | MBTI | ESFJ |
 
-<img src="../assets/pillaw_mascot.png" width="300"/>
+<p align="center">
+  <img src="../assets/pillaw_app_icon.png" width="220"/>
+</p>
 
 ---
 
