@@ -161,6 +161,7 @@ Raises:
 
 ## 📚 협업일지
 
+
 | 월 | 화 | 수 | 목 | 금 |
 | --- | --- | --- | --- | --- |
 |  |  |  |  | **2026.06.26**<br/>📒 [데일리브리핑](https://app.notion.com/p/38ba35cd00a98030a6c8d928db044155?source=copy_link)<br/><img src=".images/ws_image.jpeg" width="16" style="border-radius:50%;vertical-align:middle;"> [김완수](https://app.notion.com/p/Daliy-Log-38ba35cd00a98031806bcb6b371c3d4b?source=copy_link)<br/><img src=".images/ch_image.jpg" width="16" style="border-radius:50%;vertical-align:middle;"> [안찬형](https://app.notion.com/p/Daliy-Log-38ba35cd00a98032b720fc77ad2ffec1?source=copy_link)<br/><img src=".images/hj_image.jpg" width="16" style="border-radius:50%;vertical-align:middle;"> [임현진](https://app.notion.com/p/Daliy-Log-38ba35cd00a980a6ba74ebbebca3f056?source=copy_link)<br/><img src=".images/sw_image.jpg" width="16" style="border-radius:50%;vertical-align:middle;"> [최승원](https://app.notion.com/p/Daliy-Log-38ba35cd00a980f9a88fc986b444a090?source=copy_link) |
