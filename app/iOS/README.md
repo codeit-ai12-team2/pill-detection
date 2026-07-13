@@ -215,6 +215,7 @@ flowchart TD
 
 
 ---
+
 # 🎨 Pillaw UI/UX
 
 > 신뢰감 있는 의료 서비스이면서도, 알약을 직접 검색·대조해야 하는 번거로움을 없애는 것을 목표로 한 디자인
@@ -282,22 +283,6 @@ flowchart TD
 ---
 
 ## 4. 화면 흐름
-
-```mermaid
-flowchart TD
-    Splash["온보딩<br/>(스플래시)"] --> Select["확인 방법 선택<br/>(카메라 인식 / 즐겨찾는 알약)"]
-
-    Select -->|카메라로 인식| Camera[카메라 촬영]
-    Select -->|즐겨찾는 알약| FavList[즐겨찾는 알약 목록]
-
-    Camera -->|촬영| Result["촬영 결과<br/>(bbox + 인식 목록)"]
-
-    Result -->|정상 알약 선택| Detail["알약 상세 정보<br/>(성분·효능·용량)"]
-    Result -->|제한/미확인 알약 선택| Invalid[확인 제한 안내]
-
-    FavList --> Detail
-    Detail --> MyList[내 약 목록]
-```
 
 ![전체 레이아웃](./assets/pillaw_layout.png)
 
