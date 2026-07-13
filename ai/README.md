@@ -93,13 +93,17 @@
 | bbox 범위 초과 | 1개 | 이미지 경계로 범위 조정 |
 | 작은 bbox | 0개 | 해당 없음 |
 
-## 4. 데이터 처리
+## 4. 데이터 처리 및 모델 학습 (YOLO)
 
 원본 데이터를 학습에 쓸 수 있는 형태로 가공하는 스크립트와 파이프라인은 아래 문서를 참고하세요.
 
 - 📎 [ai/src/util README](src/util/README.md)
 
-### init.py 실행 방법
+Kaggle 알약 탐지 데이터셋 + AI-Hub 데이터(TL/TS 조합 1, 3, 4, 5, 6, 7, 8)로 **YOLO26l** 모델을 학습합니다. 기본 파이프라인(데이터 가공 → 학습 → 평가 → 제출)에 더해, Kaggle 점수 개선을 위한 데이터 분리 · Oversampling · Hard Negative Mining · Threshold Grid Search를 함께 적용했습니다.
+
+구현 프레임워크: `Ultralytics` (학습/추론/평가), `Albumentations` (커스텀 증강)
+
+### 4-1. init.py 실행 방법
 
 ```
 cd ai/src
@@ -114,29 +118,7 @@ python init.py
 
 이후 선택한 동작에 따라 `train.py` / `test.py` / `result.py` / `model_converter.py`가 실행됩니다.
 
-## 5. 최종 모델 (YOLO)
-Kaggle 알약 탐지 데이터셋 + AI-Hub 데이터(TL/TS 조합 1, 3, 4, 5, 6, 7, 8)로 **YOLO26l** 모델을 학습합니다. 기본 파이프라인(학습 → 평가 → 제출)에 더해, Kaggle 점수 개선을 위한 데이터 재분리 · Oversampling · Hard Negative Mining · Threshold Grid Search를 함께 적용했습니다.
-
-구현 프레임워크: `Ultralytics` (학습/추론/평가), `Albumentations` (커스텀 증강)
-
-
-### 5-1. 파이프라인 실행 순서
-
-`shared_dataset_composer.py`는 raw 데이터를 processed로 변환하는 최초 1회성 스크립트라 `init.py` 메뉴에 없고 직접 실행합니다. 나머지는 위 4번 `init.py` 메뉴로도 실행할 수 있습니다.
-
-| 순서 | 명령어 | 설명 | 실행 방식 |
-| :--: | --- | --- | :--: |
-| 1 | `python shared_dataset_composer.py` | raw → processed 변환. 데이터(K-코드) 단위로 Train/Val을 누수 없이 분리하고, 데이터 수가 적은 클래스 Oversampling까지 자동 실행 | 직접 실행 (`src/util`에서) |
-| 2 | `python train.py` | YOLO26l 학습. `init.py`로 실행 시 학습 직후 Hard Negative Mining(헷갈리는 클래스 fine-tuning)을 이어서 할지 선택 가능 | `init.py` 또는 직접 실행 |
-| 3 | `python result.py yolo26l confusion` | Confusion Matrix로 오탐 클래스 쌍 확인 | `init.py`(성능 확인 메뉴) 또는 직접 실행 |
-| 4 | `python result.py yolo26l grid-search --save-interface` | Confidence/IoU 최적 조합 탐색 후 `interface.yaml` 반영 | `init.py`(성능 확인 메뉴) 또는 직접 실행 |
-| 5 | `python result.py yolo26l class-scores --conf X --iou Y` | 클래스별 mAP50-95 확인 | `init.py`(성능 확인 메뉴) 또는 직접 실행 |
-| 6 | `python test.py` | 최종 `submission.csv` 생성 | `init.py` 또는 직접 실행 |
-| - | `python model_converter.py` | iOS 배포용 CoreML(`.mlpackage`) 변환 | `init.py` 또는 직접 실행 |
-
-> Hard Negative Mining은 더 이상 별도 스크립트가 아니라 `train.py` 학습의 마지막 단계로 통합되어 있습니다. `init.py`의 "학습" 메뉴에서 모델·데이터셋 버전 선택 후 "Hard Negative Mining도 이어서 진행할까요?"에서 예를 선택하고 헷갈리는 클래스명을 입력하면 됩니다.
-
-### 5-2. 하이퍼파라미터
+### 4-2. 하이퍼파라미터
 
 ```yaml
 epochs: 100
@@ -146,7 +128,7 @@ optimizer: auto
 cos_lr: false
 ```
 
-### 5-3. 증강
+### 4-3. 증강
 
 YOLO 기본 증강(모자이크, 믹스업, hsv, 회전 등)은 대부분 0으로 꺼두고, `Albumentations`로 알약 특성에 맞춘 증강을 별도로 구성했습니다.
 
@@ -165,19 +147,19 @@ perspective: 0
 - 명암 대비(RandomBrightnessContrast), 노이즈(GaussNoise, ISONoise), 블러(MotionBlur, GaussianBlur)
 - 대비 강화(CLAHE), 그림자(RandomShadow), 부분 가림(CoarseDropout), 압축 손상(ImageCompression)
 
-### 5-4. 성능 개선 기법
+### 4-4. 성능 개선 기법
 
 | 기법 | 설명 |
 | --- | --- |
 | **Train/Val 데이터 기반 분리** | 같은 K-코드(알약 조합)가 train/val 양쪽에 겹치지 않도록 `shared_dataset_composer.py`가 처음부터 데이터 단위로 분리. 데이터 수가 적은 클래스부터 우선 배정해 56개 클래스 전부가 train에 최소 1개 이상 포함되도록 함 |
 | **Oversampling** | Train 기준 데이터가 일정 개수 미만인 클래스를 복제하여 최소 확보 수량을 채움 |
-| **Hard Negative Mining** | Confusion Matrix에서 가장 헷갈리는 클래스 쌍을 파악한 뒤, 해당 클래스가 포함된 train 이미지만 추출해 낮은 lr로 추가 Fine-tuning (val은 절대 섞지 않아 evaluation leakage 방지) |
 | **Threshold Grid Search** | conf(0.05-0.3) · iou(0.4-0.7) 조합을 그리드서치하여 mAP50-95 기준 최적 threshold를 탐색하고 `interface.yaml`에 반영 |
 
-### 5-5. CoreML 변환 (iOS 연동)
+### 4-5. CoreML 변환 (iOS 연동)
 
 ```bash
 python model_converter.py
 ```
 
 `runs/detect/{model_name}*/weights/best.pt`를 CoreML(`.mlpackage`)로 변환합니다. 변환된 파일은 `Pillaw/App/Resources/yolo.mlpackage` 경로로 옮겨야 iOS 앱에서 인식합니다.
+

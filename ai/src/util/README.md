@@ -219,6 +219,16 @@ data/collect_single/processed/
 감싸여 있지 않고 모듈 최상위에서 바로 실행되는 스크립트**이며, 배경(negative) 이미지 추가를 위해
 `background_extractor.py`를 모듈로 import해서 그 함수들을 재사용합니다.
 
+Train/Val 분리는 이미지 단위가 아니라 **데이터(K-코드) 단위**로 이루어집니다. 파일명 앞부분의
+K-코드(예: `K-000250-000573-..._0_0.png` → `K-000250-000573`)가 같으면 각도만 다른 동일한
+물리적 알약 배치이므로, 이게 train/val 양쪽에 걸치면 사실상 같은 사진을 양쪽에서 채점하는
+데이터 누수가 됩니다. 이를 원천 차단하기 위해 같은 K-코드는 항상 train/val 중 한쪽에만 배정하고,
+그 상태에서 데이터 수가 적은 클래스부터 우선 배정해 클래스 균형도 함께 맞춥니다. 마지막으로
+train에 아예 없는 클래스가 남으면 val → train으로 자동 보정합니다.
+
+또한 train 변환이 끝난 뒤, 데이터 수가 적은 클래스는 이미지를 복제해 최소 확보 수량
+(`OVERSAMPLE_TARGET_MIN_COUNT`, 기본 20장)을 채우는 Oversampling까지 자동으로 이어서 실행합니다.
+
 ### 필요한 디렉토리 구조 (입력)
 
 ```
@@ -234,7 +244,7 @@ data/raw/
 ```
 data/processed/shared/
 ├── images/
-│   ├── train/*.png                # 원본 알약 이미지 + 배경(negative) 이미지 포함
+│   ├── train/*.png                # 원본 알약 이미지 + 배경(negative) 이미지 + Oversampling 복제본(*_dupN.png) 포함
 │   └── val/*.png
 ├── labels/
 │   ├── train/*.txt                # YOLO 포맷(class cx cy w h, 정규화됨). 배경 이미지는 빈 txt
@@ -252,8 +262,10 @@ data/processed/shared/
 | 대상 | 설명 | 인자 | 반환값 |
 |---|---|---|---|
 | (모듈 최상위) | 모든 라벨 json을 읽어 `category_dict`(id→name), `class_map`(id→YOLO index), `image_meta`(파일명→width/height/anns)를 구성하고 `class_mapping.json`/`classes.txt` 저장 | - | - |
-| `stratified_split(image_meta, class_map, train_ratio, seed)` | 클래스별 인스턴스 수가 train/val에 `train_ratio` 비율대로 고르게 배분되도록 층화 분할 (희귀 클래스부터 배정) | `image_meta, class_map, train_ratio, seed` | `(train_images, val_images)` |
+| `get_combo_id(image_name)` | 파일명 앞부분(K-코드)을 데이터(콤보) ID로 추출 | `image_name: str` | `str` |
+| `combo_stratified_split(image_meta, class_map, all_category_ids, train_ratio, seed)` | 데이터(K-코드) 단위로 묶어 train/val을 나눠 같은 물리적 알약 배치가 양쪽에 걸치는 데이터 누수를 방지. 데이터 수가 적은 클래스부터 우선 배정하고, train에 없는 클래스는 val → train으로 자동 보정 | `image_meta, class_map, all_category_ids, train_ratio, seed` | `(train_images, val_images)` |
 | `find_image(image_name)` | `IMAGE_ROOT`에서 이미지 파일을 찾음 (없으면 하위 전체 검색) | `image_name: str` | `Path \| None` |
 | `convert(image_names, mode)` | 이미지별 통합 어노테이션을 YOLO txt로 변환하고 이미지를 `images/<mode>`로 복사 | `image_names, mode` | - |
 | `add_background_images(output_dir, num_backgrounds, seed)` | `background_extractor`로 배경 이미지를 만들어 train에만 negative 샘플로 추가 | `output_dir, num_backgrounds, seed` | - |
-| (모듈 최상위) | `convert(train, "train")` → `convert(val, "val")` → `add_background_images(...)` → `dataset.yaml` 작성 순으로 실행 | - | - |
+| `oversample_rare_classes(output_dir, target_min_count, class_names)` | train에서 `target_min_count`장 미만인, 데이터 수가 적은 클래스를 이미지 복제(`_dupN` 접미사)로 채움 | `output_dir, target_min_count, class_names` | - |
+| (모듈 최상위) | `convert(train, "train")` → `convert(val, "val")` → `add_background_images(...)` → `oversample_rare_classes(...)` → `dataset.yaml` 작성 순으로 실행 | - | - |
