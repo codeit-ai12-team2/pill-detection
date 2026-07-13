@@ -5,12 +5,12 @@
 Codeit 초급 프로젝트로 진행한 알약 탐지 앱입니다.
 온디바이스 YOLO 모델로 카메라 프레임에서 알약을 감지하고, 식품의약품안전처 낱알식별 공공 API로 받아온 알약 정보를 SwiftData에 저장해 상세 정보(성분·효능·용법·주의사항)와 즐겨찾기 기능을 제공합니다.
 
-| 항목 | 내용 |
-|:-----|:-----|
-| 최소 iOS 버전 | iOS 26.2 |
-| UI | SwiftUI |
-| 로컬 저장소 | SwiftData |
-| ML | CoreML + Vision (Ultralytics YOLO26 export) |
+| 항목 | 내용                                               |
+|:-----|:-------------------------------------------------|
+| 최소 iOS 버전 | iOS 26.2                                         |
+| UI | SwiftUI                                          |
+| 로컬 저장소 | SwiftData                                        |
+| ML | CoreML + Vision (Ultralytics YOLO export)        |
 | 아키텍처 | TCA(Presentation / Domain / Data 3-layer) + MVVM |
 
 ---
@@ -45,10 +45,10 @@ https://apis.data.go.kr/1471000/MdcinGrnIdntfcInfoService03/getMdcinGrnIdntfcInf
 
 ### 1-2. CoreML 모델
 
-- 모델 파일: `Pillaw/App/Resources/yolo26.mlpackage` (Ultralytics YOLO26을 CoreML로 export한 것, 빌드 시 `yolo26.mlmodelc`로 컴파일됨)
+- 모델 파일: `Pillaw/App/Resources/yolo.mlpackage` (Ultralytics YOLO를 CoreML로 export한 것, 빌드 시 `yolo.mlmodelc`로 컴파일됨)
 - 모델을 변환하여 위 경로에 넣어두면 됩니다.
 - 모델 파일이 번들에 없어도 앱은 정상 동작하며 **감지 기능만 비활성화**됩니다 (`PillDetectorRepoImpl` 참고).
-- 모델을 교체할 때는 같은 이름(`yolo26.mlpackage`)으로 리소스를 바꾸거나 `PillDetectorRepoImpl.modelName`을 수정하면 됩니다.
+- 모델을 교체할 때는 같은 이름(`yolo.mlpackage`)으로 리소스를 바꾸거나 `PillDetectorRepoImpl.modelName`을 수정하면 됩니다.
 - 현재 모델은 GPU/ANE 컴파일이 실패하는 이슈가 있어 **CPU 전용**(`computeUnits = .cpuOnly`)으로 실행합니다.
 
 ### 1-3. 매핑 CSV
@@ -212,3 +212,88 @@ flowchart TD
 | 권한 | 용도 |
 |:-----|:-----|
 | 카메라 (`NSCameraUsageDescription`) | 알약 촬영 및 실시간 감지. 거부 시 설정 이동 안내 화면 표시 |
+
+
+---
+
+# 🎨 Pillaw UI/UX
+
+> 신뢰감 있는 의료 서비스이면서도, 알약을 직접 검색·대조해야 하는 번거로움을 없애는 것을 목표로 한 디자인
+
+| 항목 | 내용 |
+|:-----|:-----|
+| 서비스명 | Pillaw |
+| 마스코트 | Pill Goon (필군) |
+| 메인 컬러 | 블루 계열 |
+| 서브/포인트 컬러 | 파스텔 톤 |
+| 타이틀 서체 | Cloud Sofa |
+| 한글 서체 | 그리운 몽토리 |
+
+---
+
+## 1. 브랜드 아이덴티티
+
+### 1-1. 서비스명 — `Pillaw`
+
+- Pill + AI + Watch의 합성어이자, 발음상 **"Pillow(베개)"** 를 연상시킴
+- 알약 탐지라는 기술적 기능과, 베개처럼 편안한 사용자 경험을 주고자 하는 브랜드의 의도를 녹여냄
+
+### 1-2. 마스코트 — `Pill Goon(필군)`
+
+- 캡슐 알약 형태의 베개를 캐릭터화
+- 발음상 **"Feel Good(필굿)"** 을 연상시키도록 한 이름
+- 로딩 화면, 알약 상세 설명 화면, 오류 화면 등에서 사용
+
+| 이름 | Pill Goon(필군) |
+|:-----|:-----|
+| 성별 | 알 수 없음 |
+| MBTI | ESFJ |
+
+<p align="center">
+  <img src="../assets/pillaw_app_icon.png" width="220"/>
+</p>
+
+---
+
+## 2. 컬러 팔레트
+
+- **메인 컬러**: 블루 계열을 메인으로 채택하여 의료·헬스 서비스로서 신뢰감과 안정감 전달
+- **서브/포인트 컬러**: 파스텔 톤으로 통일하여, 더욱 친근하면서도 따뜻한 인상으로 구성
+
+| 구분 | 색상 (HEX) |
+|:-----|:-----|
+| 메인 | `#D9EFFB` `#B2D1E9` `#8BB4D7` `#6496C4` `#3D79B2` |
+| 서브/포인트 | `#3A342C` `#FFCCCF` `#DCEDC1` `#FFF2C2` `#FFFCF7` |
+
+
+![컬러 팔레트](../assets/pillaw_color_palette.png)
+
+---
+
+## 3. 타이포그래피
+
+| 용도 | 서체 | 선정 이유 |
+|:-----|:-----|:-----|
+| 타이틀 (영문) | **Cloud Sofa** | 구름처럼 둥글둥글한 버블 형태로, 브랜드의 편안함을 시각적으로 표현 |
+| 브랜드 (한글) | **그리운 몽토리** | 둥글고 부드러운 형태와 어미 없는 문체로 친근하고 편한 톤 전달 |
+
+
+![Cloud Sofa](../assets/font_cloud_sofa.png)
+
+![그리운 몽토리](../assets/font_griun_mondori.png)
+
+---
+
+## 4. 화면 흐름
+
+![전체 레이아웃](../assets/pillaw_layout.png)
+
+---
+
+## 5. 디자인 원칙
+
+**핵심 원칙**
+- 신뢰감이 중요한 의료 서비스
+- 알약을 직접 검색·대조해야 하는 번거로움을 없애는 것
+
+> 블루 계열 메인 컬러로 신뢰감을, 파스텔 톤 포인트 컬러와 둥근 타이포그래피 등으로 편안함을 전달하여 정보의 경직성을 완화함

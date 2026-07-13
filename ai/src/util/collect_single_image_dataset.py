@@ -1,5 +1,5 @@
 """data/collect_single 에 내려받은 원본 이미지 데이터(원천데이터, ``TS_*``)에서
-class_table.csv 의 category_id 에 해당하는 이미지만 걸러내 data/collect_single/processed 로
+class_mapping.csv 의 category_id 에 해당하는 이미지만 걸러내 data/collect_single/processed 로
 정리합니다.
 
 TS_*.tar 는 파일 하나가 수십~90GB 이상으로 매우 커서, 한 번에 다 받아두고 처리하기 어렵습니다.
@@ -16,7 +16,7 @@ category_id 에 해당하는 이미지 파일만 선택적으로 압축 해제�
 어쩔 수 없이 임시 파일로 합칩니다.)
 
 이미지 파일명(예: ``K-000059_0_0_0_0_60_000_200.png``)의 앞부분 K-코드에서 앞의 0 을 제거한
-정수가 class_table.csv 의 category_id 와 대응합니다.
+정수가 class_mapping.csv 의 category_id 와 대응합니다.
 
 처리 결과로 다음을 만듭니다.
     - processed/images: 유효 category_id 이미지만 모아둔 폴더 (``K-<6자리코드>_png/*.png``).
@@ -40,7 +40,7 @@ from pathlib import Path
 from tqdm import tqdm
 
 COLLECT_SINGLE_ROOT = Path("../../data/collect_single")
-CLASS_TABLE_PATH = COLLECT_SINGLE_ROOT / "class_table.csv"
+CLASS_MAPPING_PATH = COLLECT_SINGLE_ROOT / "class_mapping.csv"
 
 WORK_DIR = Path(tempfile.gettempdir()) / "collect_single_image_extract"
 
@@ -56,10 +56,10 @@ TS_TAR_PATTERN = re.compile(r"^download_TS_(?P<index>\d+)\.tar$")
 
 
 def load_class_table(csv_path: Path) -> dict[int, dict]:
-    """class_table.csv 를 읽어 category_id -> {class_index, class_name} 매핑을 만듭니다.
+    """class_mapping.csv 를 읽어 category_id -> {class_index, class_name} 매핑을 만듭니다.
 
     Args:
-        csv_path: class_table.csv 파일 경로.
+        csv_path: class_mapping.csv 파일 경로.
 
     Returns:
         category_id 를 key 로 갖고, class_index/class_name 을 담은 dict 를 value 로 갖는 딕셔너리.
@@ -69,7 +69,7 @@ def load_class_table(csv_path: Path) -> dict[int, dict]:
         for row in csv.DictReader(f):
             class_table[int(row["category_id"])] = {
                 "class_index": int(row["class_index"]),
-                "class_name": row["class_name"],
+                "class_name": row["dl_name"],
             }
     return class_table
 
@@ -285,7 +285,7 @@ def write_image_count_md(class_table: dict[int, dict], total_file_counts: dict[i
     lines = [
         "# collect_single 클래스별 이미지 파일 개수",
         "",
-        f"- class_table.csv 기준 전체 클래스 수: {len(class_table)}",
+        f"- class_mapping.csv 기준 전체 클래스 수: {len(class_table)}",
         f"- 이미지가 존재하는 클래스 수: {found_classes}",
         f"- 전체 이미지 파일 수: {sum(total_file_counts.values())}",
         "",
@@ -318,7 +318,7 @@ def write_image_count_csv(class_table: dict[int, dict], total_file_counts: dict[
 
 
 def main() -> None:
-    class_table = load_class_table(CLASS_TABLE_PATH)
+    class_table = load_class_table(CLASS_MAPPING_PATH)
     PROCESSED_IMAGES_DIR.mkdir(parents=True, exist_ok=True)
 
     state = load_state(STATE_PATH)
