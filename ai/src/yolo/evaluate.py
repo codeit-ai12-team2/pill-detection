@@ -1,7 +1,9 @@
-"""학습 결과 확인: mAP 지표 / confusion matrix / conf·iou 튜닝 / 클래스별 성능.
+"""학습 결과 확인: confusion matrix / conf·iou 튜닝 / 클래스별 성능.
+
+mAP50 / mAP50-95 / recall 같은 기본 지표 확인은 result.py를 사용하세요.
+이 스크립트는 result.py에 없는 세 가지 분석 기능만 제공합니다.
 
 사용 예:
-    python evaluate.py metrics
     python evaluate.py confusion
     python evaluate.py grid-search --save-interface
     python evaluate.py class-scores --conf 0.15 --iou 0.5
@@ -10,31 +12,46 @@
 
 import argparse
 import itertools
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import yaml
-from common import DATASET_YAML, YOLO_DIR, find_latest_run, load_config
 from ultralytics import YOLO
 
+YOLO_DIR = Path(__file__).parent
 
-def print_best_metrics(model_name: str):
-    """results.csv에서 mAP50-95가 가장 좋았던 epoch의 지표를 출력합니다."""
-    latest_run = find_latest_run(model_name)
-    df = pd.read_csv(latest_run / "results.csv")
-    df.columns = df.columns.str.strip()
-    best = df.loc[df["metrics/mAP50-95(B)"].idxmax()]
-    print(
-        f"{latest_run.name}: mAP50={best['metrics/mAP50(B)']:.4f} "
-        f"mAP50-95={best['metrics/mAP50-95(B)']:.4f} recall={best['metrics/recall(B)']:.4f}"
+DATASET_PATHS = {
+    "v1": "../../data/processed/shared/dataset.yaml",
+    "v2": "../../data/processed/shared_v2/dataset.yaml",
+}
+
+
+def load_config(config_path):
+    with open(config_path, encoding="utf-8") as f:
+        return yaml.safe_load(f)
+
+
+def find_best_weights(model_name: str):
+    """선택된 모델의 가장 최근 학습 결과에서 best.pt 경로를 반환합니다."""
+    runs_dir = YOLO_DIR / "runs/detect"
+    if not runs_dir.exists():
+        return None
+    candidates = sorted(
+        [
+            d
+            for d in runs_dir.glob(f"{model_name}*")
+            if (d / "weights/best.pt").exists()
+        ],
+        key=lambda d: d.stat().st_mtime,
+        reverse=True,
     )
+    return (candidates[0] / "weights/best.pt") if candidates else None
 
 
-def plot_normalized_confusion_matrix(
-    weights_path, data_yaml=DATASET_YAML, figsize=(20, 18)
-) -> None:
-    """정규화된 confusion matrix를 그리고, 가장 헷갈리는 클래스 쌍 상위 10개를 출력합니다.
+def plot_normalized_confusion_matrix(weights_path, data_yaml, figsize=(20, 18)) -> None:
+    """정규화된 confusion matrix를 그리고, 가장 헷갈리는 클래스 상위 10개를 출력합니다.
 
     Args:
         weights_path: 평가에 사용할 가중치(best.pt) 경로.
@@ -46,9 +63,7 @@ def plot_normalized_confusion_matrix(
 
     cm = metrics.confusion_matrix.matrix
     if cm.sum() == 0:
-        raise RuntimeError(
-            "confusion matrix가 비어 있습니다. weights_path/data_yaml 경로를 확인하세요."
-        )
+        raise RuntimeError("confusion matrix가 비어 있습니다.")
 
     col_sums = cm.sum(axis=0, keepdims=True)
     col_sums[col_sums == 0] = 1
@@ -90,12 +105,13 @@ def plot_normalized_confusion_matrix(
 
 
 def grid_search_thresholds(
-    weights_path, conf_values=None, iou_values=None
+    weights_path, data_yaml, conf_values=None, iou_values=None
 ) -> pd.DataFrame:
     """conf/iou 조합별로 val을 돌려 mAP50-95 기준 내림차순으로 정렬한 결과를 반환합니다.
 
     Args:
         weights_path: 평가에 사용할 가중치(best.pt) 경로.
+        data_yaml: 평가에 사용할 dataset.yaml 경로.
         conf_values: 시도할 confidence threshold 목록.
         iou_values: 시도할 NMS IoU threshold 목록.
     """
@@ -107,7 +123,7 @@ def grid_search_thresholds(
 
     for conf, iou in itertools.product(conf_values, iou_values):
         metrics = model.val(
-            data=str(DATASET_YAML), conf=conf, iou=iou, plots=False, verbose=False
+            data=str(data_yaml), conf=conf, iou=iou, plots=False, verbose=False
         )
         grid_results.append(
             {
@@ -127,24 +143,24 @@ def grid_search_thresholds(
 
 
 def save_interface_config(conf: float, iou: float):
-    """그리드서치 최적 conf/iou를 config/interface.yaml에 반영합니다 (imgsz는 유지)."""
-    interface_path = YOLO_DIR / "config" / "interface.yaml"
+    """그리드서치 최적 conf/iou를 interface.yaml에 반영합니다."""
+    interface_path = YOLO_DIR / "interface.yaml"
     config = load_config(interface_path)
     config["conf"] = conf
     config["iou"] = iou
     with open(interface_path, "w", encoding="utf-8") as f:
         yaml.dump(config, f, allow_unicode=True)
-    print(f"config/interface.yaml 갱신 완료: conf={conf}, iou={iou}")
+    print(f"interface.yaml 갱신 완료: conf={conf}, iou={iou}")
 
 
 def class_scores_below(
-    weights_path, conf: float, iou: float, top_n: int = 15
+    weights_path, data_yaml, conf: float, iou: float, top_n: int = 15
 ) -> pd.DataFrame:
     """클래스별 mAP50-95를 낮은 순으로 정렬해 상위 top_n개를 반환합니다."""
-    class_names_dict = load_config(DATASET_YAML)["names"]
+    class_names_dict = load_config(data_yaml)["names"]
 
     model = YOLO(weights_path)
-    metrics = model.val(data=str(DATASET_YAML), conf=conf, iou=iou, plots=False)
+    metrics = model.val(data=str(data_yaml), conf=conf, iou=iou, plots=False)
 
     class_scores = []
     for cls_idx, score in enumerate(metrics.box.maps):
@@ -158,17 +174,13 @@ def class_scores_below(
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="학습 결과 확인 (metrics / confusion matrix / threshold 튜닝)"
-    )
+    parser = argparse.ArgumentParser(description="학습 결과 심화 분석")
     parser.add_argument(
-        "--model-name", default="yolo26l", help="find_latest_run에 쓸 run 이름 접두사"
+        "--model-name", default="yolo26l", help="find_best_weights에 쓸 run 이름 접두사"
     )
+    parser.add_argument("--dataset-version", default="v1", help='"v1" 또는 "v2"')
     sub = parser.add_subparsers(dest="command", required=True)
 
-    sub.add_parser(
-        "metrics", help="가장 좋았던 epoch의 mAP50 / mAP50-95 / recall을 출력합니다."
-    )
     sub.add_parser("confusion", help="정규화 confusion matrix를 그립니다.")
 
     grid_parser = sub.add_parser(
@@ -177,7 +189,7 @@ def main():
     grid_parser.add_argument(
         "--save-interface",
         action="store_true",
-        help="최적 조합을 config/interface.yaml에 저장합니다.",
+        help="최적 조합을 interface.yaml에 저장합니다.",
     )
 
     class_parser = sub.add_parser(
@@ -187,22 +199,28 @@ def main():
     class_parser.add_argument("--iou", type=float, required=True)
 
     args = parser.parse_args()
-    latest_run = find_latest_run(args.model_name)
-    latest_weights = latest_run / "weights" / "best.pt"
 
-    if args.command == "metrics":
-        print_best_metrics(args.model_name)
-    elif args.command == "confusion":
-        plot_normalized_confusion_matrix(latest_weights)
+    data_yaml = (YOLO_DIR / DATASET_PATHS[args.dataset_version]).resolve()
+
+    best_pt = find_best_weights(args.model_name)
+    if best_pt is None:
+        print(
+            f"[오류] '{args.model_name}'의 학습된 가중치(best.pt)를 찾을 수 없습니다."
+        )
+        print("먼저 학습(train)을 실행하세요.")
+        return
+
+    if args.command == "confusion":
+        plot_normalized_confusion_matrix(best_pt, data_yaml)
     elif args.command == "grid-search":
-        grid_df = grid_search_thresholds(latest_weights)
+        grid_df = grid_search_thresholds(best_pt, data_yaml)
         if args.save_interface:
             best_row = grid_df.iloc[0]
             save_interface_config(
                 conf=float(best_row["conf"]), iou=float(best_row["iou"])
             )
     elif args.command == "class-scores":
-        class_scores_below(latest_weights, conf=args.conf, iou=args.iou)
+        class_scores_below(best_pt, data_yaml, conf=args.conf, iou=args.iou)
 
 
 if __name__ == "__main__":
