@@ -250,7 +250,7 @@ flowchart TD
 | 성별 | 알 수 없음 |
 | MBTI | ESFJ |
 
-![Pill Goon 마스코트](./assets/pillgoon_app_icon.png)   # 마스코트 및 앱 아이콘
+![Pill Goon 마스코트](./assets/pillgoon_app_icon.png)
 
 ---
 
@@ -278,6 +278,7 @@ flowchart TD
 
 
 ![Cloud Sofa](./assets/font_cloud_sofa.png)
+
 ![그리운 몽토리](./assets/font_griun_mondori.png)
 
 ---
