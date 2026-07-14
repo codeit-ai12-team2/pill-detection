@@ -176,7 +176,7 @@ Raises:
 | **2026.07.13**<br/>📒 [데일리브리핑](https://app.notion.com/p/39ca35cd00a98049951dfb82866e499b?source=copy_link)<br/><img src=".images/ws_image.jpeg" width="16" style="border-radius:50%;vertical-align:middle;"> [김완수](https://app.notion.com/p/Daliy-Log-39ca35cd00a980dd8ba6c60a4b6eca22?source=copy_link)<br/><img src=".images/ch_image.jpg" width="16" style="border-radius:50%;vertical-align:middle;"> [안찬형](https://app.notion.com/p/Daliy-Log-39ca35cd00a980169b54cba53a914591?source=copy_link)<br/><img src=".images/hj_image.jpg" width="16" style="border-radius:50%;vertical-align:middle;"> [임현진](https://app.notion.com/p/Daliy-Log-39ca35cd00a98022a247daa5279650f8?source=copy_link)<br/><img src=".images/sw_image.jpg" width="16" style="border-radius:50%;vertical-align:middle;"> [최승원](https://app.notion.com/p/Daliy-Log-39ca35cd00a9807794edf11594595e7e?source=copy_link) | **2026.07.14**<br/>📒 [데일리브리핑](https://app.notion.com/p/39ca35cd00a980d9b3b0f3bfa507ec3e?source=copy_link)<br/><img src=".images/ws_image.jpeg" width="16" style="border-radius:50%;vertical-align:middle;"> [김완수](https://app.notion.com/p/Daliy-Log-39ca35cd00a98042a1a1eec5e42ee7f8?source=copy_link)<br/><img src=".images/ch_image.jpg" width="16" style="border-radius:50%;vertical-align:middle;"> [안찬형](https://app.notion.com/p/Daliy-Log-39ca35cd00a980d5829ac7776beb2882?source=copy_link)<br/><img src=".images/hj_image.jpg" width="16" style="border-radius:50%;vertical-align:middle;"> [임현진](https://app.notion.com/p/Daliy-Log-39ca35cd00a98096ae86ef1a36caf770?source=copy_link)<br/><img src=".images/sw_image.jpg" width="16" style="border-radius:50%;vertical-align:middle;"> [최승원](https://app.notion.com/p/Daliy-Log-39ca35cd00a980259167ffff583ed135?source=copy_link) |  |  |  |
 
 ### 협업일지 취합 링크
- - [김완수]()
- - [안찬형]()
- - [임현진]()
+ - [김완수](https://app.notion.com/p/39da35cd00a980bbb590f78b8b417a93?source=copy_link)
+ - [안찬형](https://app.notion.com/p/39da35cd00a98044b885c99abcc0094c?source=copy_link)
+ - [임현진](https://app.notion.com/p/39da35cd00a980d79e3bdeb3d9c405e9?source=copy_link)
  - [최승원](https://app.notion.com/p/39da35cd00a9805084a1d4ce5e497045?source=copy_link)
