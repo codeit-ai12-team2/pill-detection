@@ -5,6 +5,7 @@
 </div>
 
 Repo URL : [![Repo](https://img.shields.io/badge/GitHub-Repository-181717?style=flat&logo=github)](https://github.com/codeit-ai12-team2/pill-detection)
+
 팀 보고서 URL : (https://app.notion.com/p/39ca35cd00a98080b165daa0ae7d7be9?source=copy_link)
 
 <br/>
